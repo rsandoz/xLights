@@ -23,11 +23,90 @@
 #include <cmath>
 #include "RgbEffects.h"
 
+#define PI_DOUBLE M_PI * 2
+#define PI_THIRD M_PI/3
+
+float RgbEffects::getAngle(float difX, float difY)
+{
+    float angle;
+    // returns as radians (360 degrees equals 2*PI)
+    // for our other function it would be easier to return in degrees, but as atanf returns the angle in radians we just leave it like that
+
+    // avoding ziro division
+    // (little bit of a hack, and not a good programming style, but whateva...)
+    if(difX == 0)
+        difX += 0.0001f;
+
+    if(difY == 0)
+        difY += 0.0001f;
+
+
+    if ( difX >= 0 && difY >= 0 )
+    {
+        angle = atanf( difX / difY );
+    }
+    else if (difX >= 0 && difY <= 0)
+    {
+        angle = M_PI_2 + atanf(-difY / difX);
+    }
+    else if(difX <= 0 && difY <= 0)
+    {
+        angle = M_PI + atanf(difX / difY);
+    }
+    else if (difX <= 0 && difY >= 0)
+    {
+        angle = M_PI_2 + M_PI + atanf(difY / -difX);
+    }
+    return angle;
+}
 
 void RgbEffects::RenderCircles(int number,int radius, bool bounce, bool collide, bool random,
                                bool radial, bool radial_3D, int start_x, int start_y, bool plasma)
 {
+     wxImage::HSVValue hsv;
+     palette.GetHSV(0, hsv);
+     double pos=0.0;
+     int x,y;
 
+     float angle;
+
+     int xp, yp;
+     wxColor color;
+
+     if (bounce)/* temp means direction... */
+        angle = -(float)PI_DOUBLE * (float)state/20.0f;
+     else
+        angle = (float)PI_DOUBLE * (float)state/20.0f;
+
+     float dx,dy, diff, dysq;
+     float curAngle;
+
+     for (yp = 0; yp < BufferHt; yp++)
+     {
+         dy = yp - BufferHt/2.0;
+         dysq = dy*dy;
+         for (xp = 0; xp < BufferWi; xp++)
+         {
+             dx = xp - BufferWi/2.0;
+             diff = sqrtf(dx*dx+dysq);
+
+             curAngle = getAngle(dx , dy);
+             getColorForAngle(curAngle+angle+(diff/400.0*M_PI), color);
+             SetPixel(xp,yp, color);
+         }
+     }
+
+
+    /* Expirement with drawing spirals
+     for (;pos<=1.0; pos += .001)
+     {
+         x = int(cos(pos*radius*M_PI *2) * number*10 *(1-pos)) + BufferWi/2;
+         y = int(sin(pos*radius*M_PI *2) * number*10 *(1-pos)) + BufferHt/2;
+         SetPixel(x,y,hsv);
+     }
+     */
+
+/*
     int ii=0;
     int colorIdx;
     size_t colorCnt=GetColorCount();
@@ -108,6 +187,7 @@ void RgbEffects::RenderCircles(int number,int radius, bool bounce, bool collide,
             }
         }
     }
+    */
 }
 
 void RgbEffects::RenderCirclesUpdate(int ballCnt, RgbBalls* effObjs)
@@ -185,5 +265,59 @@ void RgbEffects::RenderMetaBalls(int numBalls)
             }
         }
     }
+}
+
+void RgbEffects::getColorForAngle(float angle, wxColor &color)
+{
+    // returns the color for a given angle (angle can be from 0 to DOUBLE_PI, (360.0 degrees in radians))
+    size_t colorCnt=GetColorCount();
+    int green, red, blue;
+    green = red = blue = 0;
+
+    // make sure angle is between 0 and DOUBLE_PI
+    while (angle < 0)
+        angle = angle + PI_DOUBLE;
+
+    // I'd go for number 3 (but I didn't test it, you're free to do so)
+    if (angle > PI_DOUBLE)
+        angle -= (int)(angle / PI_DOUBLE) * PI_DOUBLE;
+
+
+    // this calculates one of the three color parts (one if always ziro, the other one is always 255)
+    // (255.0/60.0) is about 4
+    int z = 4 * ((int)(angle / M_PI * 180.0f)%60);
+
+
+    if (angle < PI_THIRD)
+    {
+        red = 255;
+        green = z;
+    }
+    else if (angle < PI_THIRD * 2.0)
+    {
+        red = 255 - z;
+        green = 255;
+    }
+    else if (angle < PI_THIRD * 3.0)
+    {
+        green = 255;
+        blue = z;
+    }
+    else if (angle < PI_THIRD * 4.0)
+    {
+        green = 255 - z;
+        blue = 255;
+    }
+    else if (angle < PI_THIRD * 5.0)
+    {
+        red = z;
+        blue = 255;
+    }
+    else
+    {
+        red = 255;
+        blue = 255 - z;
+    }
+    color.Set(red, green, blue);
 }
 

@@ -507,6 +507,8 @@ protected:
 private:
     void RenderRadial(int start_x,int start_y,int radius,int colorCnt, int number, bool radial_3D);
     void RenderCirclesUpdate(int number, RgbBalls* effObjs);
+    void getColorForAngle(float angle, wxColor &color);
+    float getAngle(float difX, float difY);
 };
 
 #endif // XLIGHTS_RGBEFFECTS_H
