@@ -2353,7 +2353,7 @@ void xLightsFrame::RenderGridToSeqData()
         ModelNode=GetModelNode(ColName);
         if (!ModelNode) continue;
         buffer.InitBuffer(ModelNode);
-        if (!buffer.MyDisplay) continue;
+        //if (!buffer.MyDisplay) continue;
         NodeCnt=buffer.GetNodeCount();
         ChannelLimit=buffer.GetLastChannel() + 1;
 
