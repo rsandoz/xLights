@@ -73,46 +73,42 @@ void RgbEffects::RenderCircles(int number,int radius, bool bounce, bool collide,
      int xp, yp;
      wxColor color;
 
-     if (bounce)/* temp means direction... */
-        angle = -(float)PI_DOUBLE * (float)state/20.0f;
-     else
-        angle = (float)PI_DOUBLE * (float)state/20.0f;
+    if (radial_3D)
+    {
+        static double foobar[1000];
+        static int idx = 0;
 
-     float dx,dy, diff, dysq;
-     float curAngle;
+         if (bounce)/* temp means direction... */
+            angle = -(float)PI_DOUBLE * (float)state/20.0f;
+         else
+            angle = (float)PI_DOUBLE * (float)state/20.0f;
 
-     for (yp = 0; yp < BufferHt; yp++)
-     {
-         dy = yp - BufferHt/2.0;
-         dysq = dy*dy;
-         for (xp = 0; xp < BufferWi; xp++)
+         float dx,dy, diff, dysq;
+         float curAngle;
+
+         for (yp = 0; yp < BufferHt; yp++)
          {
-             dx = xp - BufferWi/2.0;
-             diff = sqrtf(dx*dx+dysq);
+             dy = yp - BufferHt/2.0;
+             dysq = dy*dy;
+             for (xp = 0; xp < BufferWi; xp++)
+             {
+                 dx = xp - BufferWi/2.0;
+                 diff = sqrtf(dx*dx+dysq);
 
-             curAngle = getAngle(dx , dy);
-             getColorForAngle(curAngle+angle+(diff/400.0*M_PI), color);
-             SetPixel(xp,yp, color);
+                 curAngle = getAngle(dx , dy);
+                 getColorForAngle(curAngle+angle+(diff/400.0*M_PI), color);
+                 SetPixel(xp,yp, color);
+             }
          }
-     }
+         return;
+    }
 
-
-    /* Expirement with drawing spirals
-     for (;pos<=1.0; pos += .001)
-     {
-         x = int(cos(pos*radius*M_PI *2) * number*10 *(1-pos)) + BufferWi/2;
-         y = int(sin(pos*radius*M_PI *2) * number*10 *(1-pos)) + BufferHt/2;
-         SetPixel(x,y,hsv);
-     }
-     */
-
-/*
     int ii=0;
     int colorIdx;
     size_t colorCnt=GetColorCount();
-    wxImage::HSVValue hsv;
+    //wxImage::HSVValue hsv;
     float spd;
-    float angle;
+    //float angle;
     static int numBalls = 0;
     RgbBalls *effectObjects;
     static bool metaType=false;
@@ -187,7 +183,6 @@ void RgbEffects::RenderCircles(int number,int radius, bool bounce, bool collide,
             }
         }
     }
-    */
 }
 
 void RgbEffects::RenderCirclesUpdate(int ballCnt, RgbBalls* effObjs)
@@ -272,8 +267,13 @@ void RgbEffects::getColorForAngle(float angle, wxColor &color)
     // returns the color for a given angle (angle can be from 0 to DOUBLE_PI, (360.0 degrees in radians))
     size_t colorCnt=GetColorCount();
     int green, red, blue;
+    static double foo[1000];
+    static int idx =0;
+
     green = red = blue = 0;
 
+    idx = (idx+1)%1000;
+    foo[idx] = angle;
     // make sure angle is between 0 and DOUBLE_PI
     while (angle < 0)
         angle = angle + PI_DOUBLE;

@@ -42,7 +42,8 @@ void RgbEffects::RenderBars(int PaletteRepeat, int Direction, bool Highlight, bo
         int BlockHt=colorcnt * BarHt;
         if(BlockHt<1) BlockHt=1;
         int f_offset = (fitToTime)?position*BlockHt: state/4 % BlockHt;
-        f_offset = Direction == 8 || Direction == 9 ? (state/20)*BarHt: f_offset;
+        int multiplier = (fitToTime)? ((position < 0.5)?1:2):(state/20);
+        f_offset = Direction == 8 || Direction == 9 ? multiplier*BarHt: f_offset;
         Direction = Direction > 4?Direction-8:Direction;
 
         for (y=0; y<BufferHt; y++)
