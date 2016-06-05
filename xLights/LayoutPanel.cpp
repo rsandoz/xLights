@@ -29,7 +29,6 @@
 #include "models/ModelImages.h"
 
 #define ALL_MODELS_GROUP 0
-#define MY_DISPLAY_GROUP 1
 
 //(*IdInit(LayoutPanel)
 const long LayoutPanel::ID_CHECKLISTBOX_MODEL_GROUPS = wxNewId();
@@ -117,7 +116,7 @@ LayoutPanel::LayoutPanel(wxWindow* parent, xLightsFrame *xl) : xlights(xl),
     m_creating_bound_rect(false), mPointSize(2), m_moving_handle(false), m_dragging(false),
     m_over_handle(-1), selectedButton(nullptr), newModel(nullptr), selectedModel(nullptr),
     colSizesSet(false), updatingProperty(false), mNumGroups(0), mPropGridActive(true),
-    mDisplayAllModels(false), mDisplayMyDisplay(false), mSelectedGroup(-1)
+    mDisplayAllModels(false), mSelectedGroup(-1)
 {
     backgroundProperty = nullptr;
     _lastCustomModel = "";
@@ -192,11 +191,6 @@ LayoutPanel::LayoutPanel(wxWindow* parent, xLightsFrame *xl) : xlights(xl),
 	Connect(ID_SPLITTERWINDOW2,wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED,(wxObjectEventFunction)&LayoutPanel::OnSplitterWindowSashPosChanged);
 	//*)
 
-#if wxCHECK_VERSION(3, 1, 0)
-    Connect(ID_LISTBOX_ELEMENT_LIST,wxEVT_LIST_ITEM_CHECKED,(wxObjectEventFunction)&LayoutPanel::OnListBoxElementItemChecked);
-    Connect(ID_LISTBOX_ELEMENT_LIST,wxEVT_LIST_ITEM_UNCHECKED,(wxObjectEventFunction)&LayoutPanel::OnListBoxElementItemChecked);
-#endif
-
     modelPreview = new ModelPreview( (wxPanel*) PreviewGLPanel, xlights->PreviewModels, true);
     PreviewGLSizer->Add(modelPreview, 1, wxALL | wxEXPAND, 0);
     PreviewGLSizer->Fit(PreviewGLPanel);
@@ -254,8 +248,6 @@ LayoutPanel::LayoutPanel(wxWindow* parent, xLightsFrame *xl) : xlights(xl),
     int sel = config->Read("LayoutGroupSelections", -1);
     if( sel == ALL_MODELS_GROUP ) {
         mDisplayAllModels = true;
-    } else if( sel == MY_DISPLAY_GROUP ) {
-        mDisplayMyDisplay = true;
     }
 
     wxListItem elementCol;
@@ -482,9 +474,6 @@ void LayoutPanel::refreshModelList() {
         int end_channel = model->GetLastChannel()+1;
         ListBoxElementList->SetItem(x,1, start_channel);
         ListBoxElementList->SetItem(x,2, wxString::Format(wxT("%i"),end_channel));
-#if wxCHECK_VERSION(3, 1, 0)
-        ListBoxElementList->CheckItem(x, model->IsMyDisplay());
-#endif
     }
 }
 void LayoutPanel::UpdateModelList(bool update_groups) {
@@ -500,21 +489,12 @@ void LayoutPanel::UpdateModelList(bool update_groups) {
                 models.push_back(it->second);
             }
         }
-    } else if( mDisplayMyDisplay ) {
-        for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
-            if (it->second->GetDisplayAs() != "ModelGroup" && it->second->IsMyDisplay()) {
-                models.push_back(it->second);
-            }
-        }
     } else {
         for (auto it = xlights->PreviewModels.begin(); it != xlights->PreviewModels.end(); it++) {
             models.push_back(*it);
         }
     }
 
-#if wxCHECK_VERSION(3, 1, 0)
-    ListBoxElementList->EnableCheckboxes(enableCheckboxes);
-#endif
     for (auto it = models.begin(); it != models.end(); it++) {
         Model *model = *it;
         if (model->GetDisplayAs() == "ModelGroup") {
@@ -528,9 +508,6 @@ void LayoutPanel::UpdateModelList(bool update_groups) {
         ListBoxElementList->SetItem(itemIndex,1, start_channel);
         ListBoxElementList->SetItem(itemIndex,2, wxString::Format(wxT("%i"),end_channel));
         ListBoxElementList->SetItemPtrData(itemIndex,(wxUIntPtr)model);
-#if wxCHECK_VERSION(3, 1, 0)
-        ListBoxElementList->CheckItem(itemIndex, model->IsMyDisplay());
-#endif
     }
 
     if( update_groups ) {
@@ -582,7 +559,6 @@ void LayoutPanel::UpdateModelGroupList()
     mNumGroups = 0;
 
     AddModelGroupItem("[built-in] All Models", nullptr, false);
-    AddModelGroupItem("[built-in] My Display", nullptr, false);
 
     for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
         Model *model = it->second;
@@ -595,15 +571,8 @@ void LayoutPanel::UpdateModelGroupList()
         }
     }
 
-    // re-select active group after the list is rebuilt
-    if( mSelectedGroup > MY_DISPLAY_GROUP ) {
-        ListBoxModelGroups->SetItemState( mSelectedGroup, wxLIST_STATE_SELECTED, -1 );
-    }
-
     if( mDisplayAllModels ) {
         ListBoxModelGroups->SetChecked(ALL_MODELS_GROUP, true);
-    } else if( mDisplayMyDisplay ) {
-        ListBoxModelGroups->SetChecked(MY_DISPLAY_GROUP, true);
     }
 }
 
@@ -624,13 +593,6 @@ void LayoutPanel::ModelGroupChecked(wxCommandEvent& event)
 
     if( index == ALL_MODELS_GROUP ) {
         mDisplayAllModels = checked;
-        mDisplayMyDisplay = false;
-        ListBoxModelGroups->SetChecked(MY_DISPLAY_GROUP, false);
-        xlights->UpdateModelsList(false);
-    } else if( index == MY_DISPLAY_GROUP ) {
-        mDisplayAllModels = false;
-        mDisplayMyDisplay = checked;
-        ListBoxModelGroups->SetChecked(ALL_MODELS_GROUP, false);
         xlights->UpdateModelsList(false);
     } else {
         if( checked ) {
@@ -639,8 +601,6 @@ void LayoutPanel::ModelGroupChecked(wxCommandEvent& event)
             mNumGroupsFiltered--;
         }
         mDisplayAllModels = false;
-        mDisplayMyDisplay = false;
-        ListBoxModelGroups->SetChecked(MY_DISPLAY_GROUP, false);
         ListBoxModelGroups->SetChecked(ALL_MODELS_GROUP, false);
 
         for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
@@ -873,18 +833,6 @@ int wxCALLBACK SortElementsFunctionDESC(wxIntPtr item1, wxIntPtr item2, wxIntPtr
     return SortElementsFunctionASC(item2, item1, sortColumn);
 }
 
-void LayoutPanel::OnListBoxElementItemChecked(wxListEvent& event) {
-#if wxCHECK_VERSION(3, 1, 0)
-    bool b = xlights->AllModels[event.GetLabel().ToStdString()]->IsMyDisplay();
-    if (b != ListBoxElementList->IsItemChecked(event.GetIndex())) {
-        CreateUndoPoint("ModelProperty", event.GetLabel().ToStdString(), "ModelMyDisplay", xlights->AllModels[event.GetLabel().ToStdString()]->IsMyDisplay()?"true":"false");
-
-        xlights->AllModels[event.GetLabel().ToStdString()]->SetMyDisplay(ListBoxElementList->IsItemChecked(event.GetIndex()));
-        MarkEffectsFileDirty();
-        resetPropertyGrid();
-    }
-#endif
-}
 void LayoutPanel::OnListBoxElementListColumnClick(wxListEvent& event)
 {
     int col = event.GetColumn();
@@ -1098,18 +1046,18 @@ void LayoutPanel::OnPreviewLeftUp(wxMouseEvent& event)
         newModel->UpdateXmlWithScale();
         xlights->AllModels.AddModel(newModel);
 
-        if (mSelectedGroup > MY_DISPLAY_GROUP) {
+        if (mSelectedGroup > ALL_MODELS_GROUP) {
             wxString sel = ListBoxModelGroups->GetItemText(mSelectedGroup, 1);
             ModelGroup *grp = (ModelGroup*)xlights->AllModels[sel.ToStdString()];
             if (grp != nullptr) {
                 grp->AddModel(newModel->name);
                 model_grp_panel->UpdatePanel(sel.ToStdString());
-                if( !ListBoxModelGroups->IsChecked(mSelectedGroup) && !mDisplayAllModels && !mDisplayMyDisplay && mNumGroupsFiltered > 0 ) {
+                if( !ListBoxModelGroups->IsChecked(mSelectedGroup) && !mDisplayAllModels && mNumGroupsFiltered > 0 ) {
                     std::string msg = wxString::Format("Model was added to selected group (%s) which is currently hidden!\n", grp->name).ToStdString();
                     wxMessageBox(msg);
                 }
             }
-        } else if( !mDisplayAllModels && !mDisplayMyDisplay && mNumGroupsFiltered > 0 ) {
+        } else if( !mDisplayAllModels && mNumGroupsFiltered > 0 ) {
             std::string msg = "Model was added but group filtering prevents it from being visible!\n";
             wxMessageBox(msg);
         }
@@ -1334,7 +1282,7 @@ void LayoutPanel::ExportModel()
     if (sel == wxNOT_FOUND) return;
     Model* model=(Model*)ListBoxElementList->GetItemData(sel);
     wxString stch = model->GetModelXml()->GetAttribute("StartChannel", wxString::Format("%d?", model->NodeStartChannel(0) + 1)); //NOTE: value coming from model is probably not what is wanted, so show the base ch# instead
-    f.Write(wxString::Format("\"%s\", \"%s\", \"%s\", %d, %d, %s, %d, %d\n", model->name, model->GetDisplayAs(), model->GetStringType(), model->GetNodeCount() / model->NodesPerString(), model->GetNodeCount(), stch, /*WRONG:*/ model->NodeStartChannel(0) / model->NodesPerString() + 1, model->MyDisplay));
+    f.Write(wxString::Format("\"%s\", \"%s\", \"%s\", %d, %d, %s, %d, %s\n", model->name, model->GetDisplayAs(), model->GetStringType(), model->GetNodeCount() / model->NodesPerString(), model->GetNodeCount(), stch, /*WRONG:*/ model->NodeStartChannel(0) / model->NodesPerString() + 1, model->GetLayoutGroup()));
     f.Close();
 }
 
@@ -2117,7 +2065,7 @@ void LayoutPanel::OnListBoxModelGroupsItemSelect(wxListEvent& event)
     DeselectModelList();
     wxListItem li = event.GetItem();
     mSelectedGroup = li.GetId();
-    if( li.GetId() > MY_DISPLAY_GROUP ) {
+    if( li.GetId() > ALL_MODELS_GROUP ) {
         std::string name = ListBoxModelGroups->GetItemText(li, 1).ToStdString();
         model_grp_panel->UpdatePanel(name);
         if( mPropGridActive ) {
@@ -2174,7 +2122,7 @@ void LayoutPanel::OnModelGroupRightDown(wxMouseEvent& event)
     int flags = wxLIST_HITTEST_ONITEMLABEL;
     long index = ListBoxModelGroups->HitTest(pos,flags,NULL); // got to use it at last
     mnuLayer->Append(ID_MNU_ADD_MODEL_GROUP,"Add Group");
-    if(index > MY_DISPLAY_GROUP ) {
+    if(index > ALL_MODELS_GROUP ) {
         mSelectedGroup = index;
         ListBoxModelGroups->SetItemState( index, wxLIST_STATE_SELECTED, -1 );
         mnuLayer->Append(ID_MNU_DELETE_MODEL_GROUP,"Delete Group");

@@ -172,7 +172,7 @@ wxString xLightsFrame::LoadEffectsFileNoCheck()
         }
     }
     SetPreviewBackgroundImage(mBackgroundImage);
-    
+
     mBackgroundBrightness = wxAtoi(GetXmlSetting("backgroundBrightness","100"));
     SetPreviewBackgroundBrightness(mBackgroundBrightness);
 
@@ -442,35 +442,10 @@ void xLightsFrame::UpdateModelsList(bool update_groups)
         }
     }
 
-    // find all models that will be hidden
-    if( at_least_one_group_is_selected ) {
-        for (auto it = AllModels.begin(); it != AllModels.end(); it++) {
-            Model *model = it->second;
-            std::string name1 = it->first;
-            model->Hidden = true;
-            for (auto it2 = PreviewModels.begin(); it2 != PreviewModels.end(); it2++) {
-                Model *model2 = *it2;
-                if( model2->name == name1 ) {
-                    model->Hidden = false;
-                    break;
-                }
-            }
-        }
-    } else {
-        for (auto it = AllModels.begin(); it != AllModels.end(); it++) {
-            Model *model = it->second;
-            if (model->IsMyDisplay()) {
-                model->Hidden = false;
-            } else {
-                model->Hidden = true;
-            }
-        }
-    }
-
     if (PreviewModels.size() == 0) {
         for (auto it = AllModels.begin(); it != AllModels.end(); it++) {
             Model *model = it->second;
-            if (model->IsMyDisplay()) {
+            if (model->GetLayoutGroup() == "Default") {
                 PreviewModels.push_back(model);
             }
         }

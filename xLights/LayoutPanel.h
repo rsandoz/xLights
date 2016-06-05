@@ -173,7 +173,6 @@ class LayoutPanel: public wxPanel
         int mHitTestNextSelectModelIndex;
         int mNumGroups;
         bool mDisplayAllModels;
-        bool mDisplayMyDisplay;
         bool mPropGridActive;
         int mSelectedGroup;
         int mNumGroupsFiltered;

@@ -1106,6 +1106,8 @@ xLightsFrame::xLightsFrame(wxWindow* parent,wxWindowID id) : mSequenceElements(t
 
     logger_base.debug("xLightsFrame constructor sequencer creation done.");
 
+    LayoutGroups.push_back(new LayoutGroup("Default"));
+    LayoutGroups.push_back(new LayoutGroup("All Models"));
     layoutPanel = new LayoutPanel(PanelPreview, this);
     FlexGridSizerPreview->Add(layoutPanel, 1, wxALL | wxEXPAND, 5);
     FlexGridSizerPreview->Fit(PanelPreview);
@@ -1119,14 +1121,14 @@ xLightsFrame::xLightsFrame(wxWindow* parent,wxWindowID id) : mSequenceElements(t
 
     Grid1HasFocus = false; //set this before grid gets any events -DJ
 
-    
+
     wxIconBundle icons;
     icons.AddIcon(wxIcon(xlights_16_xpm));
     icons.AddIcon(wxIcon(xlights_32_xpm));
     icons.AddIcon(wxIcon(xlights_64_xpm));
     icons.AddIcon(wxIcon(xlights_128_xpm));
     icons.AddIcon(wxIcon(xlights_xpm));
-    
+
     SetIcons(icons);
     SetName("xLights");
     wxPersistenceManager::Get().RegisterAndRestore(this);

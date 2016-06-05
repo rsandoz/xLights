@@ -95,6 +95,7 @@
 #include "DisplayElementsPanel.h"
 #include "effects/EffectManager.h"
 #include "models/ModelManager.h"
+#include "LayoutGroup.h"
 #include "xLightsTimer.h"
 #include "wx/aui/aui.h"
 #include "JobPool.h"
@@ -1337,6 +1338,7 @@ private:
     friend class xLightsApp; //kludge: allow xLightsApp to call OnPaneNutcrackerChar -DJ
 public:
     std::vector<Model *> PreviewModels;
+    std::vector<LayoutGroup *> LayoutGroups;
     ModelManager AllModels;
     static wxXmlNode* FindNode(wxXmlNode* parent, const wxString& tag, const wxString& attr, const wxString& value, bool create = false);
 

@@ -41,7 +41,6 @@ public:
     virtual void GetBufferSize(const std::string &type, const std::string &transform, int &BufferWi, int &BufferHi) const;
     virtual void InitRenderBufferNodes(const std::string &type, const std::string &transform,
                                        std::vector<NodeBaseClassPtr> &Nodes, int &BufferWi, int &BufferHi) const;
-    bool IsMyDisplay() { return isMyDisplay;}
     const ModelManager &GetModelManager() const {
         return modelManager;
     }
@@ -101,7 +100,6 @@ protected:
 
     int StrobeRate;      // 0=no strobing
     bool zeroBased;
-    bool isMyDisplay;
     wxXmlNode* ModelXml;
 
     virtual const ModelScreenLocation &GetModelScreenLocation() const = 0;
@@ -117,6 +115,7 @@ protected:
     bool isBotToTop;
     std::string StringType; // RGB Nodes, 3 Channel RGB, Single Color Red, Single Color Green, Single Color Blue, Single Color White
     std::string DisplayAs;  // Tree 360, Tree 270, Tree 180, Tree 90, Vert Matrix, Horiz Matrix, Single Line, Arches, Window Frame, Candy Cane
+    std::string layout_group;
 
     unsigned long changeCount;
 public:
@@ -127,7 +126,6 @@ public:
     bool SingleNode;     // true for dumb strings and single channel strings
     bool SingleChannel;  // true for traditional single-color strings
 
-    bool MyDisplay;
     bool Selected=false;
     bool GroupSelected=false;
     bool Hidden=false;
@@ -152,6 +150,9 @@ public:
     int GetNumberFromChannelString(const std::string &sc, bool &valid) const;
     void DisplayModelOnWindow(ModelPreview* preview, const xlColor *color =  NULL, bool allowSelected = true);
     void DisplayEffectOnWindow(ModelPreview* preview, double pointSize);
+
+    const std::string &GetLayoutGroup() const {return layout_group;}
+    void SetLayoutGroup(const std::string &grp) {layout_group = grp;}
 
     void MoveHandle(ModelPreview* preview, int handle, bool ShiftKeyPressed, int mouseX, int mouseY);
 
@@ -252,7 +253,7 @@ public:
         return GetNodeChannelCount(StrType) == 1;
     }
     static int GetNodeChannelCount(const std::string & nodeType);
-    
+
 private:
     int maxVertexCount;
 };
