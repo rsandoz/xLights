@@ -5,6 +5,7 @@
 #include "LayoutGroup.h"
 
 LayoutGroup::LayoutGroup(const std::string & name)
+: mName(name)
 {
 }
 

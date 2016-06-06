@@ -269,7 +269,7 @@ void Model::AddProperties(wxPropertyGridInterface *grid) {
 
     LAYOUT_GROUPS.clear();
     LAYOUT_GROUPS.push_back("Default");
-    LAYOUT_GROUPS.push_back("All Models");
+    LAYOUT_GROUPS.push_back("All Previews");
     LAYOUT_GROUPS.push_back("Unassigned");
 
     wxPGProperty *p;

@@ -445,7 +445,7 @@ void xLightsFrame::UpdateModelsList(bool update_groups)
     if (PreviewModels.size() == 0) {
         for (auto it = AllModels.begin(); it != AllModels.end(); it++) {
             Model *model = it->second;
-            if (model->GetLayoutGroup() == "Default") {
+            if (model->GetLayoutGroup() == "Default" || model->GetLayoutGroup() == "All Previews") {
                 PreviewModels.push_back(model);
             }
         }

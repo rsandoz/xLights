@@ -1108,6 +1108,7 @@ xLightsFrame::xLightsFrame(wxWindow* parent,wxWindowID id) : mSequenceElements(t
 
     LayoutGroups.push_back(new LayoutGroup("Default"));
     LayoutGroups.push_back(new LayoutGroup("All Models"));
+    LayoutGroups.push_back(new LayoutGroup("Unassigned"));
     layoutPanel = new LayoutPanel(PanelPreview, this);
     FlexGridSizerPreview->Add(layoutPanel, 1, wxALL | wxEXPAND, 5);
     FlexGridSizerPreview->Fit(PanelPreview);

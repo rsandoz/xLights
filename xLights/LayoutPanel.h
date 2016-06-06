@@ -6,10 +6,12 @@
 class wxSplitterWindow;
 class wxCheckBox;
 class wxSplitterEvent;
+class wxStaticText;
 class wxListCtrl;
 class wxListView;
 class wxFlexGridSizer;
 class wxButton;
+class wxChoice;
 //*)
 
 #include "wxCheckedListCtrl.h"
@@ -44,9 +46,11 @@ class LayoutPanel: public wxPanel
 		//(*Declarations(LayoutPanel)
 		wxFlexGridSizer* ToolSizer;
 		wxListView* ListBoxElementList;
+		wxChoice* ChoiceLayoutGroups;
 		wxCheckedListCtrl* ListBoxModelGroups;
 		wxSplitterWindow* SplitterWindow2;
 		wxPanel* LeftPanel;
+		wxStaticText* StaticText1;
 		wxCheckBox* CheckBoxOverlap;
 		wxPanel* SecondPanel;
 		wxButton* ButtonSavePreview;
@@ -69,6 +73,8 @@ class LayoutPanel: public wxPanel
 		static const long ID_CHECKBOXOVERLAP;
 		static const long ID_BUTTON_SAVE_PREVIEW;
 		static const long ID_PANEL5;
+		static const long ID_STATICTEXT1;
+		static const long ID_CHOICE_PREVIEWS;
 		static const long ID_PANEL1;
 		static const long ID_SPLITTERWINDOW2;
 		//*)
@@ -114,6 +120,7 @@ class LayoutPanel: public wxPanel
 		void OnListBoxModelGroupsItemActivated(wxListEvent& event);
 		void OnGroupSplitterSashPosChanged(wxSplitterEvent& event);
 		void OnListBoxModelGroupsItemDeselect(wxListEvent& event);
+		void OnChoiceLayoutGroupsSelect(wxCommandEvent& event);
 		//*)
 
 		DECLARE_EVENT_TABLE()
@@ -172,10 +179,8 @@ class LayoutPanel: public wxPanel
         int mPointSize;
         int mHitTestNextSelectModelIndex;
         int mNumGroups;
-        bool mDisplayAllModels;
         bool mPropGridActive;
         int mSelectedGroup;
-        int mNumGroupsFiltered;
         wxColour mDefaultSaveBtnColor;
 
         wxPropertyGrid *propertyEditor;
@@ -194,6 +199,7 @@ class LayoutPanel: public wxPanel
         wxString _lastCustomModel;
         Model *newModel;
         ModelGroupPanel *model_grp_panel;
+        std::string currentLayoutGroup;
 
         std::string lastModelName;
 
