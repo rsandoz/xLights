@@ -327,7 +327,7 @@ void Model::AddProperties(wxPropertyGridInterface *grid) {
         }
     }
 
-    grid->Append(new wxEnumProperty("Layout Group", "ModelLayoutGroup", LAYOUT_GROUPS, wxArrayInt(), layout_group_number));
+    grid->Append(new wxEnumProperty("Preview", "ModelLayoutGroup", LAYOUT_GROUPS, wxArrayInt(), layout_group_number));
 
     p = grid->Append(new PopupDialogProperty(this, "Strand/Node Names", "ModelStrandNodeNames", CLICK_TO_EDIT, 1));
     grid->LimitPropertyEditing(p);
@@ -822,7 +822,12 @@ void Model::SetFromXml(wxXmlNode* ModelNode, bool zb) {
     // check for old my display attribute
     wxString my_display = ModelNode->GetAttribute(wxT("MyDisplay"),wxT("NotFound"));
     if( my_display == "NotFound" ) {
-        layout_group = ModelNode->GetAttribute(wxT("LayoutGroup"),wxT("Default"));
+        layout_group = ModelNode->GetAttribute(wxT("LayoutGroup"),wxT("NotFound"));
+        if( layout_group == "NotFound" ) {
+            layout_group = "Default";
+            ModelNode->AddAttribute("LayoutGroup", layout_group);
+            IncrementChangeCount();
+        }
     } else {
         ModelNode->DeleteAttribute(wxT("MyDisplay"));
         if( my_display == "0" ) {

@@ -421,13 +421,11 @@ void xLightsFrame::UpdateModelsList(bool update_groups)
 
     std::set<std::string> modelsAdded;
 
-    bool at_least_one_group_is_selected = false;
-
     for (auto it = AllModels.begin(); it != AllModels.end(); it++) {
         Model *model = it->second;
         if (model->GetDisplayAs() == "ModelGroup") {
             ModelGroup *grp = (ModelGroup*)model;
-            if (grp->IsSelected()) {
+            if (model->GetLayoutGroup() == "All Previews" || model->GetLayoutGroup() == "Default") {
                 for (auto it = grp->ModelNames().begin(); it != grp->ModelNames().end(); it++) {
                     if (modelsAdded.find(*it) == modelsAdded.end()) {
                         Model *m = AllModels[*it];
@@ -437,7 +435,6 @@ void xLightsFrame::UpdateModelsList(bool update_groups)
                         }
                     }
                 }
-                at_least_one_group_is_selected = true;
             }
         }
     }

@@ -128,7 +128,6 @@ public:
 
     bool Selected=false;
     bool GroupSelected=false;
-    bool Hidden=false;
     std::string ModelStartChannel;
     bool CouldComputeStartChannel;
     bool Overlapping=false;

@@ -176,7 +176,7 @@ LayoutPanel::LayoutPanel(wxWindow* parent, xLightsFrame *xl) : xlights(xl),
 	FlexGridSizer1->AddGrowableCol(0);
 	ToolSizer = new wxFlexGridSizer(0, 10, 0, 0);
 	FlexGridSizer1->Add(ToolSizer, 1, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 3);
-	StaticText1 = new wxStaticText(PreviewGLPanel, ID_STATICTEXT1, _("Layout Group:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT1"));
+	StaticText1 = new wxStaticText(PreviewGLPanel, ID_STATICTEXT1, _("Preview:"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT1"));
 	wxFont StaticText1Font(12,wxFONTFAMILY_SWISS,wxFONTSTYLE_NORMAL,wxFONTWEIGHT_BOLD,false,wxEmptyString,wxFONTENCODING_DEFAULT);
 	StaticText1->SetFont(StaticText1Font);
 	FlexGridSizer1->Add(StaticText1, 1, wxLEFT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 40);
@@ -317,6 +317,7 @@ LayoutPanel::LayoutPanel(wxWindow* parent, xLightsFrame *xl) : xlights(xl),
         LayoutGroup* grp = (LayoutGroup*)(*it);
         ChoiceLayoutGroups->Append(grp->GetName());
     }
+    ChoiceLayoutGroups->SetSelection(0);
     for( int i = 0; i < ChoiceLayoutGroups->GetCount(); i++ )
     {
         if( ChoiceLayoutGroups->GetString(i) == currentLayoutGroup )
@@ -578,8 +579,10 @@ void LayoutPanel::UpdateModelGroupList()
     for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
         Model *model = it->second;
         if (model->GetDisplayAs() == "ModelGroup") {
-            ModelGroup *grp = (ModelGroup*)model;
-            AddModelGroupItem(it->first, grp, grp->IsSelected());
+            if (currentLayoutGroup == "All Models" || it->second->GetLayoutGroup() == currentLayoutGroup || it->second->GetLayoutGroup() == "All Previews" && currentLayoutGroup != "Unassigned") {
+                ModelGroup *grp = (ModelGroup*)model;
+                AddModelGroupItem(it->first, grp, grp->IsSelected());
+            }
         }
     }
 }
