@@ -151,7 +151,7 @@ public:
     void DisplayEffectOnWindow(ModelPreview* preview, double pointSize);
 
     const std::string &GetLayoutGroup() const {return layout_group;}
-    void SetLayoutGroup(const std::string &grp) {layout_group = grp;}
+    void SetLayoutGroup(const std::string &grp);
 
     void MoveHandle(ModelPreview* preview, int handle, bool ShiftKeyPressed, int mouseX, int mouseY);
 

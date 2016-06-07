@@ -835,6 +835,8 @@ void Model::SetFromXml(wxXmlNode* ModelNode, bool zb) {
         } else {
             layout_group = "Default";
         }
+        ModelNode->AddAttribute("LayoutGroup", layout_group);
+        IncrementChangeCount();
     }
 
     ModelStartChannel = ModelNode->GetAttribute("StartChannel");
@@ -1911,4 +1913,11 @@ void Model::SetModelStartChan(const std::string &start_channel) {
 
 void Model::AddSizeLocationProperties(wxPropertyGridInterface *grid) {
     GetModelScreenLocation().AddSizeLocationProperties(grid);
+}
+
+void Model::SetLayoutGroup(const std::string &grp) {
+    layout_group = grp;
+    ModelXml->DeleteAttribute("LayoutGroup");
+    ModelXml->AddAttribute("LayoutGroup", grp);
+    IncrementChangeCount();
 }

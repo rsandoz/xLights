@@ -621,7 +621,7 @@ void LayoutPanel::UpdateModelGroupList()
     for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
         Model *model = it->second;
         if (model->GetDisplayAs() == "ModelGroup") {
-            if (currentLayoutGroup == "All Models" || it->second->GetLayoutGroup() == currentLayoutGroup || it->second->GetLayoutGroup() == "All Previews" && currentLayoutGroup != "Unassigned") {
+            if (currentLayoutGroup == "All Models" || model->GetLayoutGroup() == currentLayoutGroup || model->GetLayoutGroup() == "All Previews" && currentLayoutGroup != "Unassigned") {
                 ModelGroup *grp = (ModelGroup*)model;
                 AddModelGroupItem(it->first, grp, grp->IsSelected());
             }
@@ -1066,6 +1066,17 @@ void LayoutPanel::OnPreviewLeftUp(wxMouseEvent& event)
         newModel->UpdateXmlWithScale();
         xlights->AllModels.AddModel(newModel);
 
+        newModel->SetLayoutGroup(currentLayoutGroup == "All Models" ? "Unassigned" : currentLayoutGroup);
+
+        if (mSelectedGroup != -1) {
+            wxString sel = ListBoxModelGroups->GetItemText(mSelectedGroup, 1);
+            ModelGroup *grp = (ModelGroup*)xlights->AllModels[sel.ToStdString()];
+            if (grp != nullptr) {
+                grp->AddModel(newModel->name);
+                model_grp_panel->UpdatePanel(sel.ToStdString());
+            }
+        }
+
         m_over_handle = -1;
         modelPreview->SetCursor(wxCURSOR_DEFAULT);
         if (selectedButton->GetState() == 1) {
@@ -1075,12 +1086,12 @@ void LayoutPanel::OnPreviewLeftUp(wxMouseEvent& event)
                 selectedButton->SetState(0);
                 selectedButton = nullptr;
             }
-            xlights->UpdateModelsList();
+            xlights->UpdateModelsList(false);
             UpdatePreview();
             SelectModel(name);
         } else {
             newModel = nullptr;
-            xlights->UpdateModelsList();
+            xlights->UpdateModelsList(false);
             UpdatePreview();
         }
     }
@@ -2048,6 +2059,8 @@ void LayoutPanel::OnModelGroupPopup(wxCommandEvent& event)
             node->AddAttribute("models", "");
             node->AddAttribute("layout", "grid");
             node->AddAttribute("GridSize", "400");
+            wxString grp = currentLayoutGroup == "All Models" ? "Unassigned" : currentLayoutGroup;
+            node->AddAttribute("LayoutGroup", grp);
 
             xlights->AllModels.AddModel(xlights->AllModels.CreateModel(node));
             xlights->UpdateModelsList();
@@ -2134,15 +2147,18 @@ void LayoutPanel::OnModelGroupRightDown(wxMouseEvent& event)
     long index = ListBoxModelGroups->HitTest(pos,flags,NULL); // got to use it at last
     mnuLayer->Append(ID_MNU_ADD_MODEL_GROUP,"Add Group");
     mSelectedGroup = index;
-    ListBoxModelGroups->SetItemState( index, wxLIST_STATE_SELECTED, -1 );
-    mnuLayer->Append(ID_MNU_DELETE_MODEL_GROUP,"Delete Group");
-    mnuLayer->Append(ID_MNU_RENAME_MODEL_GROUP,"Rename Group");
+    if( mSelectedGroup != -1 ) {
+        ListBoxModelGroups->SetItemState( index, wxLIST_STATE_SELECTED, -1 );
+        mnuLayer->Append(ID_MNU_DELETE_MODEL_GROUP,"Delete Group");
+        mnuLayer->Append(ID_MNU_RENAME_MODEL_GROUP,"Rename Group");
+    }
     mnuLayer->Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&LayoutPanel::OnModelGroupPopup, NULL, this);
     PopupMenu(mnuLayer);
 }
 
 void LayoutPanel::OnChoiceLayoutGroupsSelect(wxCommandEvent& event)
 {
+    mSelectedGroup = -1;
     currentLayoutGroup = std::string(ChoiceLayoutGroups->GetStringSelection().c_str());
     UpdateModelList();
     wxConfigBase* config = wxConfigBase::Get();
