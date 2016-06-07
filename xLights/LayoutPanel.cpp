@@ -506,11 +506,53 @@ void LayoutPanel::UpdateModelList(bool update_groups) {
     UnSelectAllModels();
     ListBoxElementList->DeleteAllItems();
 
+    std::set<std::string> modelsAdded;
     std::vector<Model *> models;
-    for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
-        if (it->second->GetDisplayAs() != "ModelGroup") {
-            if (currentLayoutGroup == "All Models" || it->second->GetLayoutGroup() == currentLayoutGroup || it->second->GetLayoutGroup() == "All Previews" && currentLayoutGroup != "Unassigned") {
-                models.push_back(it->second);
+    if( mSelectedGroup == -1 ) {
+        for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
+            Model *model = it->second;
+            if (model->GetDisplayAs() != "ModelGroup") {
+                if (currentLayoutGroup == "All Models" || model->GetLayoutGroup() == currentLayoutGroup || model->GetLayoutGroup() == "All Previews" && currentLayoutGroup != "Unassigned") {
+                    models.push_back(model);
+                }
+            }
+        }
+
+        // add in any models that were not in preview but belong to a group that is in the preview
+        for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
+            Model *model = it->second;
+            if (model->GetDisplayAs() == "ModelGroup") {
+                ModelGroup *grp = (ModelGroup*)(model);
+                if (currentLayoutGroup == "All Models" || model->GetLayoutGroup() == currentLayoutGroup || model->GetLayoutGroup() == "All Previews" && currentLayoutGroup != "Unassigned") {
+                    for (auto it = grp->ModelNames().begin(); it != grp->ModelNames().end(); it++) {
+                        if (modelsAdded.find(*it) == modelsAdded.end()) {
+                            Model *m = xlights->AllModels[*it];
+                            if (m != nullptr) {
+                                modelsAdded.insert(*it);
+                                models.push_back(m);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        std::string name = ListBoxModelGroups->GetItemText(mSelectedGroup, 1).ToStdString();
+        for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
+            Model *model = it->second;
+            if (model->GetDisplayAs() == "ModelGroup") {
+                ModelGroup *grp = (ModelGroup*)(model);
+                if( grp->name == name ) {
+                    for (auto it = grp->ModelNames().begin(); it != grp->ModelNames().end(); it++) {
+                        if (modelsAdded.find(*it) == modelsAdded.end()) {
+                            Model *m = xlights->AllModels[*it];
+                            if (m != nullptr) {
+                                modelsAdded.insert(*it);
+                                models.push_back(m);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -591,27 +633,10 @@ void LayoutPanel::ModelGroupChecked(wxCommandEvent& event)
 {
     int index = (size_t)event.GetClientObject();
     bool checked = ListBoxModelGroups->IsChecked(index);
-    wxString name = ListBoxModelGroups->GetItemText(index, 1);
-
-    if( index != mSelectedGroup ) {
-        DeselectModelGroupList();
-        ListBoxModelGroups->SetItemState( index, wxLIST_STATE_SELECTED, -1 );
-        mSelectedGroup = index;
+    if( mSelectedGroup != -1 ) {
+        ListBoxModelGroups->SetItemState(mSelectedGroup, 0, -1);
     }
-
-    for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
-        Model *model = it->second;
-        if (model->GetDisplayAs() == "ModelGroup") {
-            if( it->first == name ) {
-                ModelGroup *grp = (ModelGroup*)model;
-                grp->SetSelected(checked);
-
-                xlights->UpdateModelsList(false);
-                MarkEffectsFileDirty();
-                break;
-            }
-        }
-    }
+    ListBoxModelGroups->SetItemState(index, checked ? wxLIST_STATE_SELECTED : 0, -1);
 }
 
 void LayoutPanel::UnSelectAllModels(bool addBkgProps)
@@ -2040,12 +2065,23 @@ void LayoutPanel::OnModelGroupPopup(wxCommandEvent& event)
 
 void LayoutPanel::OnListBoxModelGroupsItemSelect(wxListEvent& event)
 {
+    wxListItem li = event.GetItem();
+    int index = li.GetId();
+    SelectModelGroup(index);
+}
+
+void LayoutPanel::SelectModelGroup(int index)
+{
     UnSelectAllModels(false);
     DeselectModelList();
-    wxListItem li = event.GetItem();
-    mSelectedGroup = li.GetId();
+    mSelectedGroup = index;
 
-    std::string name = ListBoxModelGroups->GetItemText(li, 1).ToStdString();
+    for( int i = 0; i < ListBoxModelGroups->GetItemCount(); i++) {
+        ListBoxModelGroups->SetChecked(i, false);
+    }
+    ListBoxModelGroups->SetChecked(index, true);
+
+    std::string name = ListBoxModelGroups->GetItemText(index, 1).ToStdString();
     model_grp_panel->UpdatePanel(name);
     if( mPropGridActive ) {
         ModelSplitter->ReplaceWindow(propertyEditor, ModelGroupWindow);
@@ -2053,11 +2089,16 @@ void LayoutPanel::OnListBoxModelGroupsItemSelect(wxListEvent& event)
         ModelGroupWindow->Show();
         mPropGridActive = false;
     }
+    xlights->UpdateModelsList(false);
 }
 
 void LayoutPanel::OnListBoxModelGroupsItemDeselect(wxListEvent& event)
 {
+    for( int i = 0; i < ListBoxModelGroups->GetItemCount(); i++) {
+        ListBoxModelGroups->SetChecked(i, false);
+    }
     mSelectedGroup = -1;
+    xlights->UpdateModelsList(false);
 }
 
 void LayoutPanel::DeselectModelGroupList()

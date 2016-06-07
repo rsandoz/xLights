@@ -145,6 +145,7 @@ class LayoutPanel: public wxPanel
         void UpdateModelGroupList();
         void ModelGroupChecked(wxCommandEvent& event);
         void DeselectModelGroupList();
+        void SelectModelGroup(int index);
         void DeselectModelList();
         void MarkEffectsFileDirty();
         void SetDirtyHiLight(bool dirty);
