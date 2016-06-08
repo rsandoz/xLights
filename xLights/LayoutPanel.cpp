@@ -30,6 +30,7 @@
 #include "../include/eye-16_gray.xpm"
 
 #include "models/ModelImages.h"
+#include "PreviewPane.h"
 
 
 //(*IdInit(LayoutPanel)
@@ -2286,6 +2287,9 @@ void LayoutPanel::AddPreviewChoice(const std::string &name)
             {
                 ChoiceLayoutGroups->SetSelection(i);
                 modelPreview->SetbackgroundImage(GetBackgroundImageForSelectedPreview());
+                if( currentLayoutGroup != "Default" && currentLayoutGroup != "All Models" && currentLayoutGroup != "Unassigned" ) {
+                    ButtonLaunchPreview->Enable(true);
+                }
                 UpdatePreview();
                 break;
             }
@@ -2324,17 +2328,17 @@ void LayoutPanel::OnButtonLaunchPreviewClick(wxCommandEvent& event)
         LayoutGroup* grp = (LayoutGroup*)(*it);
         if( currentLayoutGroup == grp->GetName() ) {
             grp->SetModels(modelPreview->GetModels());
-            wxWindow* wnd = new wxWindow(main_sequencer, wxID_ANY, wxDefaultPosition, wxDefaultSize);
-            wxFlexGridSizer* FlexGridSizer1 = new wxFlexGridSizer(1, 1, 0, 0);
-
             ModelPreview* new_preview = new ModelPreview(main_sequencer, grp->GetModels(), false);
             xlights->PreviewWindows.push_back(new_preview);
-            FlexGridSizer1->Add(new_preview, 1, wxALL|wxEXPAND, 0);
-
-            SetSizer(FlexGridSizer1);
-            FlexGridSizer1->Fit(this);
-            FlexGridSizer1->SetSizeHints(this);
-
+            new_preview->InitializePreview(previewBackgroundFile,100);
+            new_preview->SetScaleBackgroundImage(true);
+            new_preview->SetCanvasSize(modelPreview->GetVirtualCanvasWidth(),modelPreview->GetVirtualCanvasHeight());
+            new_preview->SetVirtualCanvasSize(modelPreview->GetVirtualCanvasWidth(), modelPreview->GetVirtualCanvasHeight());
+            PreviewPane* preview = new PreviewPane(xlights, new_preview, wxID_ANY, wxDefaultPosition, wxSize(modelPreview->GetVirtualCanvasWidth(), modelPreview->GetVirtualCanvasHeight()));
+            preview->Show();
+            preview->SetSize(100,100);
+            new_preview->Refresh();
+            preview->Refresh();
             break;
         }
     }
