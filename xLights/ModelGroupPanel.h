@@ -22,6 +22,7 @@ class ModelGroupPanel: public wxPanel
 		virtual ~ModelGroupPanel();
 
 		void UpdatePanel(const std::string group);
+		void AddPreviewChoice(const std::string name);
 
 		//(*Declarations(ModelGroupPanel)
 		wxStaticText* StaticText2;

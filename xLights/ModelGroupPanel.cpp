@@ -129,20 +129,20 @@ ModelGroupPanel::ModelGroupPanel(wxWindow* parent,ModelManager &Models,xLightsFr
 	Connect(ID_BITMAPBUTTON2,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&ModelGroupPanel::OnButtonDownClick);
 	//*)
 
-    for (auto it = xl->LayoutGroups.begin(); it != xl->LayoutGroups.end(); it++) {
-        LayoutGroup* grp = (LayoutGroup*)(*it);
-        if( grp->GetName() == "All Models" ) {
-            ChoicePreviews->Append("All Previews");
-        } else {
-            ChoicePreviews->Append(grp->GetName());
-        }
-    }
+    ChoicePreviews->Append("Default");
+    ChoicePreviews->Append("All Previews");
+    ChoicePreviews->Append("Unassigned");
 }
 
 ModelGroupPanel::~ModelGroupPanel()
 {
 	//(*Destroy(ModelGroupPanel)
 	//*)
+}
+
+void ModelGroupPanel::AddPreviewChoice(const std::string name)
+{
+    ChoicePreviews->Append(name);
 }
 
 void ModelGroupPanel::UpdatePanel(const std::string group)

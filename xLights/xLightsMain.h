@@ -1094,7 +1094,6 @@ private:
     void TimerRgbSeq(long msec);
     void SetChoicebook(wxChoicebook* cb, const wxString& PageName);
     void UpdateGrid();
-    void SetXmlSetting(const wxString& settingName,const wxString& value);
     wxString GetXmlSetting(const wxString& settingName,const wxString& defaultValue);
 
     wxString CreateEffectString();
@@ -1153,6 +1152,8 @@ public:
     void SetFrequency(int frequency);
     void RenderAll();
 
+    void SetXmlSetting(const wxString& settingName,const wxString& value);
+
 protected:
     void ClearEffectWindow();
     bool SeqLoadXlightsFile(const wxString& filename, bool ChooseModels);
@@ -1191,6 +1192,7 @@ protected:
 public:
     wxXmlNode* ModelsNode;
     wxXmlNode* ModelGroupsNode;
+    wxXmlNode* LayoutGroupsNode;
 private:
     wxXmlNode* SettingsNode;
 

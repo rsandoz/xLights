@@ -30,6 +30,7 @@ class wxPropertyGridEvent;
 class NewModelBitmapButton;
 class wxImageFileProperty;
 class wxScrolledWindow;
+class LayoutGroup;
 
 wxDECLARE_EVENT(EVT_LISTITEM_CHECKED, wxCommandEvent);
 
@@ -136,6 +137,7 @@ class LayoutPanel: public wxPanel
         void SelectModel(const std::string & name);
         void UnSelectAllModels(bool addBkgProps = true);
         void SetupPropGrid(Model *model);
+        void AddPreviewChoice(const std::string &name);
 
     protected:
         void ExportModel();
@@ -231,6 +233,7 @@ class LayoutPanel: public wxPanel
         void OnModelPopup(wxCommandEvent& event);
         void OnModelGroupPopup(wxCommandEvent& event);
 		void OnModelGroupRightDown(wxMouseEvent& event);
+		LayoutGroup* GetLayoutGroup(const std::string &name);
 };
 
 #endif

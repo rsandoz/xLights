@@ -272,6 +272,19 @@ void Model::AddProperties(wxPropertyGridInterface *grid) {
     LAYOUT_GROUPS.push_back("All Previews");
     LAYOUT_GROUPS.push_back("Unassigned");
 
+    wxXmlNode* layouts_node = modelManager.GetLayoutsNode();
+    for(wxXmlNode* e=layouts_node->GetChildren(); e!=NULL; e=e->GetNext() )
+    {
+        if (e->GetName() == "layoutGroup")
+        {
+            wxString grp_name=e->GetAttribute("name");
+            if (!grp_name.IsEmpty())
+            {
+                LAYOUT_GROUPS.push_back(grp_name.ToStdString());
+            }
+        }
+    }
+
     wxPGProperty *p;
     wxPGProperty *sp;
 
@@ -1921,3 +1934,4 @@ void Model::SetLayoutGroup(const std::string &grp) {
     ModelXml->AddAttribute("LayoutGroup", grp);
     IncrementChangeCount();
 }
+

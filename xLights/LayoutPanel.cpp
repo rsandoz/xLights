@@ -313,10 +313,14 @@ LayoutPanel::LayoutPanel(wxWindow* parent, xLightsFrame *xl) : xlights(xl),
 
     mDefaultSaveBtnColor = ButtonSavePreview->GetBackgroundColour();
 
+    ChoiceLayoutGroups->Append("Default");
+    ChoiceLayoutGroups->Append("All Models");
+    ChoiceLayoutGroups->Append("Unassigned");
     for (auto it = xlights->LayoutGroups.begin(); it != xlights->LayoutGroups.end(); it++) {
         LayoutGroup* grp = (LayoutGroup*)(*it);
         ChoiceLayoutGroups->Append(grp->GetName());
     }
+    ChoiceLayoutGroups->Append("<Create New Preview>");
     ChoiceLayoutGroups->SetSelection(0);
     for( int i = 0; i < ChoiceLayoutGroups->GetCount(); i++ )
     {
@@ -390,7 +394,19 @@ void LayoutPanel::OnPropertyGridChange(wxPropertyGridEvent& event) {
         xlights->SetPreviewSize(modelPreview->GetVirtualCanvasWidth(), event.GetValue().GetLong());
         xlights->UpdateModelsList();
     } else if (name == "BkgImage") {
-        xlights->SetPreviewBackgroundImage(event.GetValue().GetString());
+        if( currentLayoutGroup == "Default" || currentLayoutGroup == "All Models" || currentLayoutGroup == "Unassigned" ) {
+            xlights->SetPreviewBackgroundImage(event.GetValue().GetString());
+        } else {
+            for (auto it = xlights->LayoutGroups.begin(); it != xlights->LayoutGroups.end(); it++) {
+                LayoutGroup* grp = (LayoutGroup*)(*it);
+                if( currentLayoutGroup == grp->GetName() ) {
+                    grp->SetBackgroundImage(event.GetValue().GetString());
+                    MarkEffectsFileDirty();
+                    xlights->UpdatePreview();
+                    break;
+                }
+            }
+        }
     } else if (name == "BkgFill") {
         xlights->SetPreviewBackgroundScaled(event.GetValue().GetBool());
     } else if (selectedModel != nullptr) {
@@ -600,7 +616,7 @@ void LayoutPanel::AddModelGroupItem(wxString name, ModelGroup *grp, bool selecte
 
 void LayoutPanel::UpdateModelGroupList()
 {
-    ListBoxModelGroups->ClearAll();
+    ListBoxModelGroups->DeleteAllItems();
 
 	wxListItem col0;
 	col0.SetId(0);
@@ -652,14 +668,28 @@ void LayoutPanel::UnSelectAllModels(bool addBkgProps)
     if (!updatingProperty && addBkgProps) {
         propertyEditor->Freeze();
         clearPropGrid();
-        if (backgroundProperty != nullptr && backgroundProperty->GetValue().GetString() != modelPreview->GetBackgroundImage()) {
+
+        wxString preview_background_image = "";
+        if( currentLayoutGroup == "Default" || currentLayoutGroup == "All Models" || currentLayoutGroup == "Unassigned" ) {
+            preview_background_image = modelPreview->GetBackgroundImage();
+        } else {
+            for (auto it = xlights->LayoutGroups.begin(); it != xlights->LayoutGroups.end(); it++) {
+                LayoutGroup* grp = (LayoutGroup*)(*it);
+                if( currentLayoutGroup == grp->GetName() ) {
+                    preview_background_image = grp->GetBackgroundImage();
+                    break;
+                }
+            }
+        }
+
+        if (backgroundProperty != nullptr && backgroundProperty->GetValue().GetString() != preview_background_image) {
             delete backgroundProperty;
             backgroundProperty = nullptr;
         }
         if (backgroundProperty == nullptr) {
             backgroundProperty = new wxImageFileProperty("Background Image",
                                                          "BkgImage",
-                                                         modelPreview->GetBackgroundImage());
+                                                         preview_background_image);
         }
         propertyEditor->Append(backgroundProperty);
         propertyEditor->Append(new wxBoolProperty("Fill", "BkgFill", modelPreview->GetScaleBackgroundImage()))->SetAttribute("UseCheckbox", 1);
@@ -2156,11 +2186,65 @@ void LayoutPanel::OnModelGroupRightDown(wxMouseEvent& event)
     PopupMenu(mnuLayer);
 }
 
+LayoutGroup* LayoutPanel::GetLayoutGroup(const std::string &name)
+{
+    for (auto it = xlights->LayoutGroups.begin(); it != xlights->LayoutGroups.end(); it++) {
+        LayoutGroup* grp = (LayoutGroup*)(*it);
+        if( grp->GetName() == name ) {
+            return grp;
+        }
+    }
+    return nullptr;
+}
+
 void LayoutPanel::OnChoiceLayoutGroupsSelect(wxCommandEvent& event)
 {
-    mSelectedGroup = -1;
-    currentLayoutGroup = std::string(ChoiceLayoutGroups->GetStringSelection().c_str());
-    UpdateModelList();
+    std::string choice_layout = std::string(ChoiceLayoutGroups->GetStringSelection().c_str());
+    if( choice_layout == "<Create New Preview>" ) {
+        wxTextEntryDialog dlg(this, "Enter name for new preview", "Create New Preview");
+        if (dlg.ShowModal() == wxID_OK) {
+            wxString name = dlg.GetValue();
+            while (GetLayoutGroup(name.ToStdString()) != nullptr || name == "Default" || name == "All Models" || name == "Unassigned") {
+                wxTextEntryDialog dlg2(this, "Preview of name " + name + " already exists. Enter name for new preview", "Create New Preview");
+                if (dlg2.ShowModal() == wxID_OK) {
+                    name = dlg2.GetValue();
+                } else {
+                    ChoiceLayoutGroups->SetSelection(ChoiceLayoutGroups->GetCount()-1);
+                    return;
+                }
+            }
+            wxXmlNode *node = new wxXmlNode(wxXML_ELEMENT_NODE, "layoutGroup");
+            xlights->LayoutGroupsNode->AddChild(node);
+            node->AddAttribute("name", name);
+
+            mSelectedGroup = -1;
+            currentLayoutGroup = name.ToStdString();
+            LayoutGroup* grp = new LayoutGroup(name.ToStdString());
+            xlights->LayoutGroups.push_back(grp);
+            ChoiceLayoutGroups->Append(name);
+            ChoiceLayoutGroups->SetSelection(ChoiceLayoutGroups->GetCount()-1);
+
+            xlights->UpdateModelsList();
+            MarkEffectsFileDirty();
+            if( !mPropGridActive ) {
+                ModelSplitter->ReplaceWindow(ModelGroupWindow, propertyEditor );
+                ModelGroupWindow->Hide();
+                propertyEditor->Show();
+                mPropGridActive = true;
+            }
+        }
+    } else {
+        currentLayoutGroup = choice_layout;
+        mSelectedGroup = -1;
+        UpdateModelList();
+    }
+
     wxConfigBase* config = wxConfigBase::Get();
     config->Write("CurrentLayoutGroup", (wxString)currentLayoutGroup );
+}
+
+void LayoutPanel::AddPreviewChoice(const std::string &name)
+{
+    ChoiceLayoutGroups->Insert(name, ChoiceLayoutGroups->GetCount()-1);
+    model_grp_panel->AddPreviewChoice(name);
 }

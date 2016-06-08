@@ -57,6 +57,7 @@ void xLightsFrame::ResetEffectsXml()
     PalettesNode=NULL;
     ViewsNode=NULL;
     ModelGroupsNode=NULL;
+    LayoutGroupsNode=NULL;
     SettingsNode=NULL;
     PerspectivesNode = NULL;
 }
@@ -93,6 +94,7 @@ wxString xLightsFrame::LoadEffectsFileNoCheck()
         if (e->GetName() == "palettes") PalettesNode=e;
         if (e->GetName() == "views") ViewsNode=e;
         if (e->GetName() == "modelGroups") ModelGroupsNode=e;
+        if (e->GetName() == "layoutGroups") LayoutGroupsNode=e;
         if (e->GetName() == "settings") SettingsNode=e;
         if (e->GetName() == "perspectives") PerspectivesNode=e;
     }
@@ -128,6 +130,30 @@ wxString xLightsFrame::LoadEffectsFileNoCheck()
         ModelGroupsNode = new wxXmlNode( wxXML_ELEMENT_NODE, "modelGroups" );
         root->AddChild( ModelGroupsNode );
         UnsavedRgbEffectsChanges = true;
+    }
+
+    if (LayoutGroupsNode == 0)
+    {
+        LayoutGroupsNode = new wxXmlNode( wxXML_ELEMENT_NODE, "layoutGroups" );
+        root->AddChild( LayoutGroupsNode );
+        UnsavedRgbEffectsChanges = true;
+    }
+
+    // TODO:  Possibly move all this into a preview manager object
+    AllModels.SetLayoutsNode(LayoutGroupsNode);  // provides easy access to layout names for the model class
+    for(wxXmlNode* e=LayoutGroupsNode->GetChildren(); e!=NULL; e=e->GetNext() )
+    {
+        if (e->GetName() == "layoutGroup")
+        {
+            wxString grp_name=e->GetAttribute("name");
+            if (!grp_name.IsEmpty())
+            {
+                LayoutGroup* grp = new LayoutGroup(grp_name.ToStdString());
+                grp->SetFromXml(e);
+                LayoutGroups.push_back(grp);
+                layoutPanel->AddPreviewChoice(grp_name.ToStdString());
+            }
+        }
     }
 
     if (PerspectivesNode == 0)
