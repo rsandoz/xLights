@@ -4,6 +4,7 @@
 #include <string>
 
 class xLightsFrame;
+class Model;
 
 class LayoutGroup
 {
@@ -19,12 +20,18 @@ class LayoutGroup
 
         void SetFromXml(wxXmlNode* LayoutGroupNode);
 
+        void SetModels(std::vector<Model*> &models);
+        std::vector<Model*> &GetModels() {
+            return previewModels;
+        }
+
     protected:
         wxXmlNode* LayoutGroupXml;
 
     private:
         std::string mName;
         wxString mBackgroundImage;
+        std::vector<Model*> previewModels;
 };
 
 #endif // LAYOUTGROUP_H

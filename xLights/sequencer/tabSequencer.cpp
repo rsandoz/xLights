@@ -1230,6 +1230,11 @@ void xLightsFrame::TimerRgbSeq(long msec)
         playModel->DisplayEffectOnWindow(sPreview1, mPointSize);
     }
     sPreview2->Render(&SeqData[frame][0]);
+    for (auto it = PreviewWindows.begin(); it != PreviewWindows.end(); it++) {
+        ModelPreview* preview = *it;
+        preview->Render(&SeqData[frame][0]);
+    }
+
 }
 
 void xLightsFrame::SetEffectControls(const std::string &modelName, const std::string &effectName,

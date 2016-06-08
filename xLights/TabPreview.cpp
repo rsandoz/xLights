@@ -15,7 +15,7 @@ void xLightsFrame::UpdatePreview()
 
 void xLightsFrame::ShowPreviewTime(long ElapsedMSec)
 {
-    
+
 }
 
 void xLightsFrame::PreviewOutput(int period)
@@ -49,6 +49,11 @@ void xLightsFrame::SetPreviewBackgroundImage(const wxString &filename) {
     modelPreview->SetbackgroundImage(mBackgroundImage);
     sPreview2->SetbackgroundImage(mBackgroundImage);
     UpdatePreview();
+}
+
+const wxString & xLightsFrame::GetDefaultPreviewBackgroundImage()
+{
+    return sPreview2->GetBackgroundImage();
 }
 
 void xLightsFrame::SetPreviewBackgroundBrightness(int i) {

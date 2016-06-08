@@ -1257,6 +1257,7 @@ public:
     void SetPreviewBackgroundScaled(bool scaled);
     void SetPreviewSize(int width, int height);
     void SetPreviewBackgroundImage(const wxString &filename);
+    const wxString & GetDefaultPreviewBackgroundImage();
     void SetPreviewBackgroundBrightness(int i);
     void UpdatePreview();
     void UpdateModelsList(bool update_groups = true);
@@ -1353,6 +1354,7 @@ private:
 public:
     std::vector<Model *> PreviewModels;
     std::vector<LayoutGroup *> LayoutGroups;
+    std::vector<ModelPreview *> PreviewWindows;
     ModelManager AllModels;
     static wxXmlNode* FindNode(wxXmlNode* parent, const wxString& tag, const wxString& attr, const wxString& value, bool create = false);
 

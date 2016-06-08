@@ -139,23 +139,6 @@ wxString xLightsFrame::LoadEffectsFileNoCheck()
         UnsavedRgbEffectsChanges = true;
     }
 
-    // TODO:  Possibly move all this into a preview manager object
-    AllModels.SetLayoutsNode(LayoutGroupsNode);  // provides easy access to layout names for the model class
-    for(wxXmlNode* e=LayoutGroupsNode->GetChildren(); e!=NULL; e=e->GetNext() )
-    {
-        if (e->GetName() == "layoutGroup")
-        {
-            wxString grp_name=e->GetAttribute("name");
-            if (!grp_name.IsEmpty())
-            {
-                LayoutGroup* grp = new LayoutGroup(grp_name.ToStdString());
-                grp->SetFromXml(e);
-                LayoutGroups.push_back(grp);
-                layoutPanel->AddPreviewChoice(grp_name.ToStdString());
-            }
-        }
-    }
-
     if (PerspectivesNode == 0)
     {
         PerspectivesNode = new wxXmlNode( wxXML_ELEMENT_NODE, "perspectives" );
@@ -198,6 +181,24 @@ wxString xLightsFrame::LoadEffectsFileNoCheck()
         }
     }
     SetPreviewBackgroundImage(mBackgroundImage);
+
+    // TODO:  Possibly move all this into a preview manager object
+    // Do this here as it may switch the background image
+    AllModels.SetLayoutsNode(LayoutGroupsNode);  // provides easy access to layout names for the model class
+    for(wxXmlNode* e=LayoutGroupsNode->GetChildren(); e!=NULL; e=e->GetNext() )
+    {
+        if (e->GetName() == "layoutGroup")
+        {
+            wxString grp_name=e->GetAttribute("name");
+            if (!grp_name.IsEmpty())
+            {
+                LayoutGroup* grp = new LayoutGroup(grp_name.ToStdString());
+                grp->SetFromXml(e);
+                LayoutGroups.push_back(grp);
+                layoutPanel->AddPreviewChoice(grp_name.ToStdString());
+            }
+        }
+    }
 
     mBackgroundBrightness = wxAtoi(GetXmlSetting("backgroundBrightness","100"));
     SetPreviewBackgroundBrightness(mBackgroundBrightness);

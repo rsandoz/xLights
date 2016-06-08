@@ -40,7 +40,7 @@ class LayoutPanel: public wxPanel
 {
     public:
 
-		LayoutPanel(wxWindow* parent, xLightsFrame *xlights);
+		LayoutPanel(wxWindow* parent, xLightsFrame *xlights, wxPanel* sequencer);
 		virtual ~LayoutPanel();
 
     private:
@@ -56,6 +56,7 @@ class LayoutPanel: public wxPanel
 		wxPanel* SecondPanel;
 		wxButton* ButtonSavePreview;
 		wxFlexGridSizer* PreviewGLSizer;
+		wxButton* ButtonLaunchPreview;
 		wxSplitterWindow* GroupSplitter;
 		wxSplitterWindow* ModelSplitter;
 		wxPanel* PreviewGLPanel;
@@ -76,6 +77,7 @@ class LayoutPanel: public wxPanel
 		static const long ID_PANEL5;
 		static const long ID_STATICTEXT1;
 		static const long ID_CHOICE_PREVIEWS;
+		static const long ID_BUTTON_LAUNCH_PREVIEW;
 		static const long ID_PANEL1;
 		static const long ID_SPLITTERWINDOW2;
 		//*)
@@ -122,6 +124,7 @@ class LayoutPanel: public wxPanel
 		void OnGroupSplitterSashPosChanged(wxSplitterEvent& event);
 		void OnListBoxModelGroupsItemDeselect(wxListEvent& event);
 		void OnChoiceLayoutGroupsSelect(wxCommandEvent& event);
+		void OnButtonLaunchPreviewClick(wxCommandEvent& event);
 		//*)
 
 		DECLARE_EVENT_TABLE()
@@ -226,6 +229,8 @@ class LayoutPanel: public wxPanel
     private:
         wxImage *background;
         wxString backgroundFile;
+        wxString previewBackgroundFile;
+        wxPanel* main_sequencer;
 
         static const long ID_MNU_DELETE_MODEL;
         static const long ID_MNU_DELETE_MODEL_GROUP;
@@ -235,6 +240,8 @@ class LayoutPanel: public wxPanel
         void OnModelGroupPopup(wxCommandEvent& event);
 		void OnModelGroupRightDown(wxMouseEvent& event);
 		LayoutGroup* GetLayoutGroup(const std::string &name);
+		const wxString& GetBackgroundImageForSelectedPreview();
+		void SwitchChoiceToCurrentLayoutGroup();
 };
 
 #endif
