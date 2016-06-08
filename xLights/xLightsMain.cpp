@@ -61,13 +61,13 @@
 
 
 //(*InternalHeaders(xLightsFrame)
-#include <wx/artprov.h>
-#include <wx/bitmap.h>
 #include <wx/settings.h>
-#include <wx/font.h>
-#include <wx/intl.h>
-#include <wx/image.h>
 #include <wx/string.h>
+#include <wx/intl.h>
+#include <wx/font.h>
+#include <wx/bitmap.h>
+#include <wx/image.h>
+#include <wx/artprov.h>
 //*)
 
 #define TOOLBAR_SAVE_VERSION "0002:"
@@ -214,6 +214,7 @@ const long xLightsFrame::idMenuDelList = wxNewId();
 const long xLightsFrame::ID_MENUITEM1 = wxNewId();
 const long xLightsFrame::idCustomScript = wxNewId();
 const long xLightsFrame::ID_MENUITEM_SAVE_PERSPECTIVE = wxNewId();
+const long xLightsFrame::ID_MENUITEM_SAVE_AS_PERSPECTIVE = wxNewId();
 const long xLightsFrame::ID_MENUITEM_LOAD_PERSPECTIVE = wxNewId();
 const long xLightsFrame::ID_MENUITEM7 = wxNewId();
 const long xLightsFrame::ID_MENUITEM_DISPLAY_ELEMENTS = wxNewId();
@@ -406,66 +407,66 @@ xLightsFrame::xLightsFrame(wxWindow* parent,wxWindowID id) : mSequenceElements(t
     Bind(EVT_RENDER_RANGE, &xLightsFrame::RenderRange, this);
 
     //(*Initialize(xLightsFrame)
-    wxStaticBoxSizer* StaticBoxSizer2;
-    wxMenuItem* MenuItem31;
-    wxMenu* MenuHelp;
-    wxMenuItem* MenuItem8;
-    wxFlexGridSizer* FlexGridSizer4;
-    wxFlexGridSizer* FlexGridSizerSetup;
-    wxMenuItem* MenuItem26;
-    wxMenuItem* MenuItemCustomScript;
-    wxMenuItem* MenuItem25;
-    wxMenuItem* MenuItem5;
     wxMenuItem* MenuItem2;
-    wxMenuItem* MenuItemAddList;
-    wxGridBagSizer* GridBagSizer1;
-    wxFlexGridSizer* FlexGridSizer27;
-    wxMenuItem* MenuItem46;
-    wxMenuItem* MenuItem4;
-    wxMenuItem* MenuItem14;
-    wxFlexGridSizer* FlexGridSizer5;
-    wxMenuItem* MenuItem11;
     wxMenuItem* MenuItem29;
-    wxStaticText* StaticText38;
-    wxFlexGridSizer* FlexGridSizer9;
-    wxMenuItem* MenuItem22;
-    wxPanel* Panel1;
-    wxMenuItem* MenuItem17;
-    wxBoxSizer* BoxSizer2;
-    wxMenuItem* MenuItem13;
-    wxFlexGridSizer* FlexGridSizer7;
-    wxMenuItem* MenuItem10;
-    wxFlexGridSizer* FlexGridSizerCal;
-    wxMenu* MenuItem_Grid_Icon_Backgrounds;
-    wxMenuItem* MenuItemDelList;
-    wxMenuItem* MenuItem12;
-    wxMenuItem* MenuItem24;
-    wxMenuItem* MenuItem27;
-    wxMenuItem* MenuItem44;
+    wxMenuItem* MenuItem23;
+    wxStaticBoxSizer* StaticBoxSizer2;
+    wxFlexGridSizer* FlexGridSizer28;
+    wxMenuItem* MenuItem31;
     wxFlexGridSizer* FlexGridSizerNetworks;
+    wxPanel* Panel1;
+    wxMenuItem* MenuItem30;
+    wxMenuItem* MenuItemDelList;
+    wxMenu* Menu5;
+    wxMenuItem* MenuItem12;
+    wxMenuItem* MenuItem25;
+    wxStaticText* StaticText28;
     wxFlexGridSizer* FlexGridSizer29;
+    wxMenuItem* MenuItem19;
+    wxMenuItem* MenuItemAddList;
+    wxFlexGridSizer* FlexGridSizerCal;
     wxMenuItem* MenuItem20;
     wxFlexGridSizer* FlexGridSizerPreview;
-    wxMenuItem* MenuItem28;
-    wxMenuItem* MenuItemDisplayElements;
-    wxMenuItem* MenuItem6;
-    wxMenuItem* MenuItem23;
-    wxStaticText* StaticText28;
-    wxBoxSizer* BoxSizer1;
-    wxMenuItem* MenuItemRenameList;
-    wxStaticBoxSizer* StaticBoxSizer1;
-    wxMenuItem* MenuItem21;
-    wxMenu* Menu2;
-    wxMenuItem* MenuItem9;
-    wxMenuItem* MenuItem45;
-    wxMenuItem* MenuItem47;
-    wxMenuItem* MenuItem30;
     wxMenuItem* MenuItem48;
-    wxFlexGridSizer* FlexGridSizer28;
-    wxMenu* MenuPlaylist;
-    wxMenu* Menu5;
-    wxMenuItem* MenuItem19;
+    wxFlexGridSizer* FlexGridSizer7;
+    wxMenu* MenuItem_Grid_Icon_Backgrounds;
+    wxMenuItem* MenuItem24;
+    wxBoxSizer* BoxSizer2;
+    wxFlexGridSizer* FlexGridSizer4;
+    wxFlexGridSizer* FlexGridSizer9;
+    wxMenuItem* MenuItem17;
+    wxMenuItem* MenuItem21;
     wxButton* Button03;
+    wxFlexGridSizer* FlexGridSizer27;
+    wxMenuItem* MenuItem9;
+    wxStaticText* StaticText38;
+    wxMenuItem* MenuItem11;
+    wxMenuItem* MenuItem22;
+    wxMenuItem* MenuItem5;
+    wxMenuItem* MenuItem44;
+    wxMenuItem* MenuItemDisplayElements;
+    wxBoxSizer* BoxSizer1;
+    wxMenuItem* MenuItem10;
+    wxMenuItem* MenuItem45;
+    wxMenuItem* MenuItem27;
+    wxGridBagSizer* GridBagSizer1;
+    wxMenuItem* MenuItem4;
+    wxMenuItem* MenuItem6;
+    wxMenuItem* MenuItem26;
+    wxMenuItem* MenuItem13;
+    wxMenu* Menu2;
+    wxMenuItem* MenuItemCustomScript;
+    wxMenu* MenuPlaylist;
+    wxMenuItem* MenuItem28;
+    wxFlexGridSizer* FlexGridSizer5;
+    wxMenu* MenuHelp;
+    wxMenuItem* MenuItem47;
+    wxMenuItem* MenuItem8;
+    wxMenuItem* MenuItem14;
+    wxMenuItem* MenuItem46;
+    wxStaticBoxSizer* StaticBoxSizer1;
+    wxMenuItem* MenuItemRenameList;
+    wxFlexGridSizer* FlexGridSizerSetup;
 
     Create(parent, wxID_ANY, _("<use variables in xLightsMain.h>"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("wxID_ANY"));
     SetClientSize(wxSize(1411,1103));
@@ -777,12 +778,15 @@ xLightsFrame::xLightsFrame(wxWindow* parent,wxWindowID id) : mSequenceElements(t
     MenuItem_ViewZoomOut = new wxMenuItem(Menu5, wxID_ZOOM_OUT, _("Zoom Out"), wxEmptyString, wxITEM_NORMAL);
     Menu5->Append(MenuItem_ViewZoomOut);
     Menu5->AppendSeparator();
-    MenuItem15 = new wxMenu();
-    MenuItemViewSavePerspective = new wxMenuItem(MenuItem15, ID_MENUITEM_SAVE_PERSPECTIVE, _("Save Current"), wxEmptyString, wxITEM_NORMAL);
-    MenuItem15->Append(MenuItemViewSavePerspective);
-    MenuItemLoadEditPerspective = new wxMenuItem(MenuItem15, ID_MENUITEM_LOAD_PERSPECTIVE, _("Edit/Load"), wxEmptyString, wxITEM_NORMAL);
-    MenuItem15->Append(MenuItemLoadEditPerspective);
-    Menu5->Append(ID_MENUITEM7, _("Perspectives"), MenuItem15, wxEmptyString);
+    MenuItemPerspectives = new wxMenu();
+    MenuItemViewSavePerspective = new wxMenuItem(MenuItemPerspectives, ID_MENUITEM_SAVE_PERSPECTIVE, _("Save Current"), wxEmptyString, wxITEM_NORMAL);
+    MenuItemPerspectives->Append(MenuItemViewSavePerspective);
+    MenuItemViewSaveAsPerspective = new wxMenuItem(MenuItemPerspectives, ID_MENUITEM_SAVE_AS_PERSPECTIVE, _("Save As New"), wxEmptyString, wxITEM_NORMAL);
+    MenuItemPerspectives->Append(MenuItemViewSaveAsPerspective);
+    MenuItemLoadEditPerspective = new wxMenuItem(MenuItemPerspectives, ID_MENUITEM_LOAD_PERSPECTIVE, _("Edit/Load"), wxEmptyString, wxITEM_NORMAL);
+    MenuItemPerspectives->Append(MenuItemLoadEditPerspective);
+    MenuItemPerspectives->AppendSeparator();
+    Menu5->Append(ID_MENUITEM7, _("Perspectives"), MenuItemPerspectives, wxEmptyString);
     MenuItem18 = new wxMenu();
     MenuItemDisplayElements = new wxMenuItem(MenuItem18, ID_MENUITEM_DISPLAY_ELEMENTS, _("Display Elements"), wxEmptyString, wxITEM_NORMAL);
     MenuItem18->Append(MenuItemDisplayElements);
@@ -997,6 +1001,7 @@ xLightsFrame::xLightsFrame(wxWindow* parent,wxWindowID id) : mSequenceElements(t
     Connect(wxID_ZOOM_IN,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&xLightsFrame::OnAuiToolBarItemZoominClick);
     Connect(wxID_ZOOM_OUT,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&xLightsFrame::OnAuiToolBarItem_ZoomOutClick);
     Connect(ID_MENUITEM_SAVE_PERSPECTIVE,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&xLightsFrame::OnMenuItemViewSavePerspectiveSelected);
+    Connect(ID_MENUITEM_SAVE_AS_PERSPECTIVE,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&xLightsFrame::OnMenuItemViewSaveAsPerspectiveSelected);
     Connect(ID_MENUITEM_LOAD_PERSPECTIVE,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&xLightsFrame::OnMenuItemLoadEditPerspectiveSelected);
     Connect(ID_MENUITEM_DISPLAY_ELEMENTS,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&xLightsFrame::ShowHideDisplayElementsWindow);
     Connect(ID_MENUITEM12,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&xLightsFrame::ShowHideModelPreview);
@@ -1434,6 +1439,7 @@ xLightsFrame::~xLightsFrame()
 
     delete CheckBoxLightOutput;
     delete ButtonGracefulStop;
+
 
     //(*Destroy(xLightsFrame)
     //*)
@@ -1946,42 +1952,48 @@ void xLightsFrame::OnMenuItemBackupSelected(wxCommandEvent& event)
     //CurrentDir
 }
 
+void xLightsFrame::CopyFiles(const wxString& wildcard, wxDir& srcDir, wxString& targetDirName)
+{
+    wxString fname;
+    wxString srcDirName = CurrentDir + wxFileName::GetPathSeparator();
+    wxFileName srcFile;
+    srcFile.SetPath(CurrentDir);
+
+    bool cont = srcDir.GetFirst(&fname, wildcard, wxDIR_FILES);
+    while (cont)
+    {
+        srcFile.SetFullName(fname);
+
+        wxULongLong fsize = srcFile.GetSize();
+        if (fsize > 20 * 1024 * 1024) // skip any xml files > 20 mbytes, they are something other than xml files
+        {
+            srcDir.GetNext(&fname);
+            continue;
+        }
+        SetStatusText("Copying File \"" + srcFile.GetFullPath());
+        bool success = wxCopyFile(srcDirName + fname,
+            targetDirName + wxFileName::GetPathSeparator() + fname);
+        if (!success)
+        {
+            wxMessageBox("Unable to copy file \"" + CurrentDir + wxFileName::GetPathSeparator() + fname + "\"",
+                "Error", wxICON_ERROR | wxOK);
+        }
+        cont = srcDir.GetNext(&fname);
+    }
+}
+
 void xLightsFrame::BackupDirectory(wxString targetDirName)
 {
     wxDir srcDir(CurrentDir);
-    wxString fname;
-    bool success;
-    wxString srcDirName = CurrentDir+wxFileName::GetPathSeparator();
-    wxFileName srcFile;
-    srcFile.SetPath(CurrentDir);
 
     if(!srcDir.IsOpened())
     {
         return;
     }
 
-    bool cont = srcDir.GetFirst(&fname, "*.xml", wxDIR_FILES);
+    CopyFiles("*.xml", srcDir, targetDirName);
+    CopyFiles("*.xbkp", srcDir, targetDirName);
 
-    while (cont)
-    {
-        srcFile.SetFullName(fname);
-
-        wxULongLong fsize=srcFile.GetSize();
-        if(fsize > 20*1024*1024) // skip any xml files > 20 mbytes, they are something other than xml files
-        {
-            srcDir.GetNext(&fname);
-            continue;
-        }
-        SetStatusText("Copying File \""+srcFile.GetFullPath());
-        success = wxCopyFile(srcDirName+fname,
-                             targetDirName+wxFileName::GetPathSeparator()+fname);
-        if (!success)
-        {
-            wxMessageBox("Unable to copy file \"" + CurrentDir+wxFileName::GetPathSeparator()+fname+"\"",
-                         "Error", wxICON_ERROR|wxOK);
-        }
-        cont = srcDir.GetNext(&fname);
-    }
     SetStatusText("All xml files backed up.");
 }
 
@@ -2870,12 +2882,12 @@ void xLightsFrame::SaveWorking()
 
     if (fn == "")
     {
-        tmp = p + "/" + "__.working.xml";
+        tmp = p + "/" + "__.xbkp";
     }
     else
     {
         wxFileName fnp(fn);
-        tmp = p + "/" + fnp.GetName() + ".working." + fnp.GetExt();
+        tmp = p + "/" + fnp.GetName()+ fnp.GetExt() + ".xbkp";
     }
     wxFileName ftmp(tmp);
 

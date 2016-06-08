@@ -120,9 +120,10 @@ LayoutPanel::LayoutPanel(wxWindow* parent, xLightsFrame *xl) : xlights(xl),
     m_creating_bound_rect(false), mPointSize(2), m_moving_handle(false), m_dragging(false),
     m_over_handle(-1), selectedButton(nullptr), newModel(nullptr), selectedModel(nullptr),
     colSizesSet(false), updatingProperty(false), mNumGroups(0), mPropGridActive(true),
-    mSelectedGroup(-1), currentLayoutGroup("Default")
+    mSelectedGroup(-1), currentLayoutGroup("Default"), backgroundFile("")
 {
-    backgroundProperty = nullptr;
+    background = nullptr;
+    
     _lastCustomModel = "";
     appearanceVisible = sizeVisible = stringPropsVisible = false;
 
@@ -372,11 +373,8 @@ void LayoutPanel::AddModelButton(const std::string &type, const char *data[]) {
 
 LayoutPanel::~LayoutPanel()
 {
-    wxPGProperty *p = propertyEditor->GetPropertyByName("BkgImage");
-    if (p == nullptr) {
-        //not in the grid, we need to delete it
-        delete backgroundProperty;
-        backgroundProperty = nullptr;
+    if (background != nullptr) {
+        delete background;
     }
 	//(*Destroy(LayoutPanel)
 	//*)
@@ -495,10 +493,6 @@ void LayoutPanel::clearPropGrid() {
     p = propertyEditor->GetPropertyByName("ModelStringProperties");
     if (p != nullptr) {
         stringPropsVisible = propertyEditor->IsPropertyExpanded(p);
-    }
-    p = propertyEditor->GetPropertyByName("BkgImage");
-    if (p != nullptr) {
-        propertyEditor->RemoveProperty(p);
     }
     propertyEditor->Clear();
 }
@@ -655,6 +649,33 @@ void LayoutPanel::ModelGroupChecked(wxCommandEvent& event)
     ListBoxModelGroups->SetItemState(index, checked ? wxLIST_STATE_SELECTED : 0, -1);
 }
 
+class xlImageProperty : public wxImageFileProperty {
+public:
+    xlImageProperty(const wxString& label,
+                    const wxString& name,
+                    const wxString& value,
+                    const wxImage &img)
+        : lastFileName(value), wxImageFileProperty(label, name, "") {
+
+        SetValueFromString(value);
+        m_pImage = new wxImage(img);
+    }
+    virtual ~xlImageProperty() {}
+    
+    virtual void OnSetValue() override {
+        wxFileProperty::OnSetValue();
+        wxFileName fn = GetFileName();
+        if (fn != lastFileName) {
+            lastFileName = fn;
+            delete m_pImage;
+            m_pImage = new wxImage(fn.GetFullPath());
+        }
+    }
+
+private:
+    wxFileName lastFileName;
+};
+
 void LayoutPanel::UnSelectAllModels(bool addBkgProps)
 {
     for (size_t i=0; i<modelPreview->GetModels().size(); i++)
@@ -668,6 +689,9 @@ void LayoutPanel::UnSelectAllModels(bool addBkgProps)
     if (!updatingProperty && addBkgProps) {
         propertyEditor->Freeze();
         clearPropGrid();
+        if (backgroundFile != modelPreview->GetBackgroundImage()) {
+            delete background;
+            background = nullptr;
 
         wxString preview_background_image = "";
         if( currentLayoutGroup == "Default" || currentLayoutGroup == "All Models" || currentLayoutGroup == "Unassigned" ) {
@@ -686,9 +710,19 @@ void LayoutPanel::UnSelectAllModels(bool addBkgProps)
             delete backgroundProperty;
             backgroundProperty = nullptr;
         }
-        if (backgroundProperty == nullptr) {
-            backgroundProperty = new wxImageFileProperty("Background Image",
+        if (background == nullptr) {
+            backgroundFile = modelPreview->GetBackgroundImage();
+            if (wxFile::Exists(backgroundFile)) {
+                background = new wxImage(backgroundFile);
+            }
+            else {
+                background = new wxImage();
+            }
+        }
+        propertyEditor->Append(new xlImageProperty("Background Image",
                                                          "BkgImage",
+                                                   modelPreview->GetBackgroundImage(),
+                                                   *background));
                                                          preview_background_image);
         }
         propertyEditor->Append(backgroundProperty);
