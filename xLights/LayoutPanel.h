@@ -55,7 +55,6 @@ class LayoutPanel: public wxPanel
 		wxCheckBox* CheckBoxOverlap;
 		wxPanel* SecondPanel;
 		wxButton* ButtonSavePreview;
-		wxFlexGridSizer* PreviewGLSizer;
 		wxButton* ButtonLaunchPreview;
 		wxSplitterWindow* GroupSplitter;
 		wxSplitterWindow* ModelSplitter;

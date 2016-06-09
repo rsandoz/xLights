@@ -132,6 +132,7 @@ LayoutPanel::LayoutPanel(wxWindow* parent, xLightsFrame *xl, wxPanel* sequencer)
 	//(*Initialize(LayoutPanel)
 	wxFlexGridSizer* LeftPanelSizer;
 	wxFlexGridSizer* FlexGridSizer2;
+	wxFlexGridSizer* PreviewGLSizer;
 	wxFlexGridSizer* FlexGridSizerPreview;
 	wxFlexGridSizer* FlexGridSizer1;
 
@@ -2328,17 +2329,20 @@ void LayoutPanel::OnButtonLaunchPreviewClick(wxCommandEvent& event)
         LayoutGroup* grp = (LayoutGroup*)(*it);
         if( currentLayoutGroup == grp->GetName() ) {
             grp->SetModels(modelPreview->GetModels());
-            ModelPreview* new_preview = new ModelPreview(main_sequencer, grp->GetModels(), false);
+
+            PreviewPane* preview = new PreviewPane(xlights, wxID_ANY, wxDefaultPosition, wxSize(modelPreview->GetVirtualCanvasWidth(), modelPreview->GetVirtualCanvasHeight()));
+            wxPanel* panel = preview->GetPreviewPanel();
+            wxFlexGridSizer* panel_sizer = preview->GetPreviewPanelSizer();
+            ModelPreview* new_preview = new ModelPreview(panel, grp->GetModels(), false);
+            panel_sizer->Add(new_preview, 1, wxALL | wxEXPAND, 0);
+
             xlights->PreviewWindows.push_back(new_preview);
-            new_preview->InitializePreview(previewBackgroundFile,100);
-            new_preview->SetScaleBackgroundImage(true);
+            new_preview->InitializePreview(previewBackgroundFile,modelPreview->GetBackgroundBrightness());
+            new_preview->SetScaleBackgroundImage(modelPreview->GetScaleBackgroundImage());
             new_preview->SetCanvasSize(modelPreview->GetVirtualCanvasWidth(),modelPreview->GetVirtualCanvasHeight());
             new_preview->SetVirtualCanvasSize(modelPreview->GetVirtualCanvasWidth(), modelPreview->GetVirtualCanvasHeight());
-            PreviewPane* preview = new PreviewPane(xlights, new_preview, wxID_ANY, wxDefaultPosition, wxSize(modelPreview->GetVirtualCanvasWidth(), modelPreview->GetVirtualCanvasHeight()));
             preview->Show();
-            preview->SetSize(100,100);
-            new_preview->Refresh();
-            preview->Refresh();
+            preview->SetSize(modelPreview->GetVirtualCanvasWidth(),modelPreview->GetVirtualCanvasHeight());
             break;
         }
     }

@@ -6,6 +6,7 @@
 //*)
 
 //(*IdInit(PreviewPane)
+const long PreviewPane::ID_PANEL_PREVIEW = wxNewId();
 //*)
 
 BEGIN_EVENT_TABLE(PreviewPane,wxDialog)
@@ -13,26 +14,30 @@ BEGIN_EVENT_TABLE(PreviewPane,wxDialog)
 	//*)
 END_EVENT_TABLE()
 
-PreviewPane::PreviewPane(wxWindow* parent,ModelPreview* preview,wxWindowID id,const wxPoint& pos,const wxSize& size)
+PreviewPane::PreviewPane(wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxSize& size)
 {
 	//(*Initialize(PreviewPane)
 	wxFlexGridSizer* Panel_Sizer;
 
-	Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE, _T("id"));
+	Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER, _T("id"));
 	SetClientSize(wxDefaultSize);
 	Move(wxDefaultPosition);
 	SetMinSize(wxDLG_UNIT(parent,wxSize(100,100)));
 	Panel_Sizer = new wxFlexGridSizer(0, 1, 0, 0);
 	Panel_Sizer->AddGrowableCol(0);
 	Panel_Sizer->AddGrowableRow(0);
+	PreviewPanel = new wxPanel(this, ID_PANEL_PREVIEW, wxDefaultPosition, wxDefaultSize, 0, _T("ID_PANEL_PREVIEW"));
+	PreviewPanelSizer = new wxFlexGridSizer(0, 1, 0, 0);
+	PreviewPanelSizer->AddGrowableCol(0);
+	PreviewPanelSizer->AddGrowableRow(0);
+	PreviewPanel->SetSizer(PreviewPanelSizer);
+	PreviewPanelSizer->Fit(PreviewPanel);
+	PreviewPanelSizer->SetSizeHints(PreviewPanel);
+	Panel_Sizer->Add(PreviewPanel, 1, wxALL|wxEXPAND, 2);
 	SetSizer(Panel_Sizer);
 	Panel_Sizer->Fit(this);
 	Panel_Sizer->SetSizeHints(this);
 	//*)
-
-	Panel_Sizer->Add((wxWindow*)preview, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-	Panel_Sizer->Fit(this);
-	Panel_Sizer->SetSizeHints(this);
 }
 
 PreviewPane::~PreviewPane()
