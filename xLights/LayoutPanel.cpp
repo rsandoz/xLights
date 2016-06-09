@@ -618,7 +618,7 @@ void LayoutPanel::AddModelGroupItem(wxString name, ModelGroup *grp, bool selecte
 
 void LayoutPanel::UpdateModelGroupList()
 {
-    ListBoxModelGroups->DeleteAllItems();
+    ListBoxModelGroups->ClearAll();
 
 	wxListItem col0;
 	col0.SetId(0);
