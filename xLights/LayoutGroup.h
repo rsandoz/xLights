@@ -21,6 +21,7 @@ class LayoutGroup
         const wxString &GetBackgroundImage() const { return mBackgroundImage;}
 
         void SetFromXml(wxXmlNode* LayoutGroupNode);
+        wxXmlNode* GetLayoutGroupXml() const;
 
         void SetModels(std::vector<Model*> &models);
         std::vector<Model*> &GetModels() {

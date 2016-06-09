@@ -94,6 +94,7 @@ class LayoutPanel: public wxPanel
         static const long ID_PREVIEW_DISTRIBUTE;
         static const long ID_PREVIEW_H_DISTRIBUTE;
         static const long ID_PREVIEW_V_DISTRIBUTE;
+        static const long ID_PREVIEW_DELETE_ACTIVE;
 
 	public:
 
@@ -242,6 +243,7 @@ class LayoutPanel: public wxPanel
 		LayoutGroup* GetLayoutGroup(const std::string &name);
 		const wxString& GetBackgroundImageForSelectedPreview();
         void SwitchChoiceToCurrentLayoutGroup();
+        void DeleteCurrentPreview();
 };
 
 #endif

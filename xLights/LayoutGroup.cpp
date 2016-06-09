@@ -17,6 +17,11 @@ LayoutGroup::LayoutGroup(const std::string & name, xLightsFrame* xl, wxXmlNode *
 
 LayoutGroup::~LayoutGroup()
 {
+    previewModels.clear();
+    if( mModelPreview != nullptr ) {
+        mPreviewClosed = true;
+        CheckPreviewClosed();
+    }
 }
 
 void LayoutGroup::SetBackgroundImage(const wxString &filename)
@@ -33,6 +38,10 @@ void LayoutGroup::SetFromXml(wxXmlNode* LayoutGroupNode)
     LayoutGroupXml = LayoutGroupNode;
     mName=LayoutGroupNode->GetAttribute("name").ToStdString();
     mBackgroundImage=LayoutGroupNode->GetAttribute("backgroundImage").ToStdString();
+}
+
+wxXmlNode* LayoutGroup::GetLayoutGroupXml() const {
+    return this->LayoutGroupXml;
 }
 
 void LayoutGroup::SetModels(std::vector<Model*> &models)

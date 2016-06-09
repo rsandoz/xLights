@@ -73,6 +73,7 @@ const long LayoutPanel::ID_MNU_DELETE_MODEL = wxNewId();
 const long LayoutPanel::ID_MNU_DELETE_MODEL_GROUP = wxNewId();
 const long LayoutPanel::ID_MNU_RENAME_MODEL_GROUP = wxNewId();
 const long LayoutPanel::ID_MNU_ADD_MODEL_GROUP = wxNewId();
+const long LayoutPanel::ID_PREVIEW_DELETE_ACTIVE = wxNewId();
 
 class NewModelBitmapButton : public wxBitmapButton
 {
@@ -1250,21 +1251,27 @@ void LayoutPanel::OnPreviewRightDown(wxMouseEvent& event)
         mnu.Append(ID_PREVIEW_DISTRIBUTE,"Distribute", mnuDistribute,"");
         mnu.AppendSeparator();
     }
-    else if (selectedModelCnt == 0)
-    {
-        return;
-    }
-    mnu.Append(ID_PREVIEW_MODEL_NODELAYOUT,"Node Layout");
-    mnu.Append(ID_PREVIEW_MODEL_EXPORTCSV,"Export CSV");
-    int sel = ListBoxElementList->GetFirstSelected();
-    if (sel != wxNOT_FOUND)
-    {
-        Model* model = (Model*)ListBoxElementList->GetItemData(sel);
-        if (model->IsCustom())
+    if (selectedModelCnt > 0) {
+        mnu.Append(ID_PREVIEW_MODEL_NODELAYOUT,"Node Layout");
+        mnu.Append(ID_PREVIEW_MODEL_EXPORTCSV,"Export CSV");
+        int sel = ListBoxElementList->GetFirstSelected();
+        if (sel != wxNOT_FOUND)
         {
-            mnu.Append(ID_PREVIEW_MODEL_EXPORTCUSTOMMODEL, "Export Custom Model");
+            Model* model = (Model*)ListBoxElementList->GetItemData(sel);
+            if (model->IsCustom())
+            {
+                mnu.Append(ID_PREVIEW_MODEL_EXPORTCUSTOMMODEL, "Export Custom Model");
+            }
         }
     }
+
+    if( currentLayoutGroup != "Default" && currentLayoutGroup != "All Models" && currentLayoutGroup != "Unassigned" ) {
+        if (selectedModelCnt > 0) {
+            mnu.AppendSeparator();
+        }
+        mnu.Append(ID_PREVIEW_DELETE_ACTIVE,"Delete this Preview");
+    }
+
     mnu.Connect(wxEVT_MENU, (wxObjectEventFunction)&LayoutPanel::OnPreviewModelPopup, NULL, this);
     PopupMenu(&mnu);
     modelPreview->SetFocus();
@@ -1314,6 +1321,10 @@ void LayoutPanel::OnPreviewModelPopup(wxCommandEvent &event)
     else if (event.GetId() == ID_PREVIEW_MODEL_EXPORTCUSTOMMODEL)
     {
         ExportCustomModel();
+    }
+    else if (event.GetId() == ID_PREVIEW_DELETE_ACTIVE)
+    {
+        DeleteCurrentPreview();
     }
 }
 
@@ -2365,5 +2376,32 @@ void LayoutPanel::OnButtonLaunchPreviewClick(wxCommandEvent& event)
             preview->SetSize(modelPreview->GetVirtualCanvasWidth(),modelPreview->GetVirtualCanvasHeight());
             break;
         }
+    }
+}
+
+void LayoutPanel::DeleteCurrentPreview()
+{
+    if (wxMessageBox("Are you sure you want to delete the " + currentLayoutGroup + " preview?", "Confirm Delete?", wxICON_QUESTION | wxYES_NO) == wxYES) {
+        ButtonLaunchPreview->Enable(false);
+        ButtonLaunchPreview->Hide();
+        for (auto it = xlights->LayoutGroups.begin(); it != xlights->LayoutGroups.end(); it++) {
+            LayoutGroup* grp = (LayoutGroup*)(*it);
+            if (grp != nullptr) {
+                if( currentLayoutGroup == grp->GetName() ) {
+                    grp->GetLayoutGroupXml()->GetParent()->RemoveChild(grp->GetLayoutGroupXml());
+                    xlights->LayoutGroups.erase(it);
+                    delete grp->GetLayoutGroupXml();
+                    delete grp;
+                    break;
+                }
+            }
+        }
+        MarkEffectsFileDirty();
+        mSelectedGroup = -1;
+        currentLayoutGroup = "Default";
+        ChoiceLayoutGroups->SetSelection(0);
+        UpdateModelList();
+        modelPreview->SetbackgroundImage(GetBackgroundImageForSelectedPreview());
+        UpdatePreview();
     }
 }
