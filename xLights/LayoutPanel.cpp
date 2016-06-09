@@ -533,6 +533,7 @@ void LayoutPanel::UpdateModelList(bool update_groups) {
             if (model->GetDisplayAs() != "ModelGroup") {
                 if (currentLayoutGroup == "All Models" || model->GetLayoutGroup() == currentLayoutGroup || model->GetLayoutGroup() == "All Previews" && currentLayoutGroup != "Unassigned") {
                     models.push_back(model);
+                    modelsAdded.insert(model->name);
                 }
             }
         }
