@@ -2362,6 +2362,7 @@ void LayoutPanel::OnButtonLaunchPreviewClick(wxCommandEvent& event)
             wxPanel* panel = preview->GetPreviewPanel();
             wxFlexGridSizer* panel_sizer = preview->GetPreviewPanelSizer();
             ModelPreview* new_preview = new ModelPreview(panel, grp->GetModels(), false);
+            grp->SetModelPreview(new_preview);
             panel_sizer->Add(new_preview, 1, wxALL | wxEXPAND, 0);
             preview->SetLayoutGroup(grp);
             grp->SetPreviewActive();

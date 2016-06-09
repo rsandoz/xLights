@@ -30,6 +30,10 @@ void LayoutGroup::SetBackgroundImage(const wxString &filename)
         mBackgroundImage = filename;
         LayoutGroupXml->DeleteAttribute("backgroundImage");
         LayoutGroupXml->AddAttribute("backgroundImage", mBackgroundImage);
+        if( mModelPreview != nullptr ) {
+            mModelPreview->SetbackgroundImage(mBackgroundImage);
+            mModelPreview->Refresh();
+        }
     }
 }
 
