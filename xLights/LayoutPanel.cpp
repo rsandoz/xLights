@@ -2399,6 +2399,14 @@ void LayoutPanel::DeleteCurrentPreview()
         }
         MarkEffectsFileDirty();
         mSelectedGroup = -1;
+        for( int i = 0; i < ChoiceLayoutGroups->GetCount(); i++ )
+        {
+            if( ChoiceLayoutGroups->GetString(i) == currentLayoutGroup )
+            {
+                ChoiceLayoutGroups->Delete(i);
+                break;
+            }
+        }
         currentLayoutGroup = "Default";
         ChoiceLayoutGroups->SetSelection(0);
         UpdateModelList();
