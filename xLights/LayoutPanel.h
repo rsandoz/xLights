@@ -224,6 +224,7 @@ class LayoutPanel: public wxPanel
         ModelPreview *modelPreview;
         void UpdateModelList(bool update_groups = true);
         void AddModelGroupItem(wxString name, ModelGroup *grp, bool selected);
+        void SetLaunchPreviewButtonState();
 
     private:
         wxImage *background;
@@ -240,7 +241,7 @@ class LayoutPanel: public wxPanel
 		void OnModelGroupRightDown(wxMouseEvent& event);
 		LayoutGroup* GetLayoutGroup(const std::string &name);
 		const wxString& GetBackgroundImageForSelectedPreview();
-		void SwitchChoiceToCurrentLayoutGroup();
+        void SwitchChoiceToCurrentLayoutGroup();
 };
 
 #endif

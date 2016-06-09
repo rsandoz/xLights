@@ -1,4 +1,5 @@
 #include "PreviewPane.h"
+#include "LayoutGroup.h"
 
 //(*InternalHeaders(PreviewPane)
 #include <wx/intl.h>
@@ -37,6 +38,8 @@ PreviewPane::PreviewPane(wxWindow* parent,wxWindowID id,const wxPoint& pos,const
 	SetSizer(Panel_Sizer);
 	Panel_Sizer->Fit(this);
 	Panel_Sizer->SetSizeHints(this);
+
+	Connect(wxID_ANY,wxEVT_CLOSE_WINDOW,(wxObjectEventFunction)&PreviewPane::OnClose);
 	//*)
 }
 
@@ -46,3 +49,15 @@ PreviewPane::~PreviewPane()
 	//*)
 }
 
+
+void PreviewPane::OnClose(wxCloseEvent& event)
+{
+    layout_grp->MarkForPreviewDeletion();
+    event.Skip();
+}
+
+void PreviewPane::SetLayoutGroup( LayoutGroup* grp )
+{
+    layout_grp = grp;
+    SetTitle(grp->GetName());
+}

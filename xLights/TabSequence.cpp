@@ -184,6 +184,7 @@ wxString xLightsFrame::LoadEffectsFileNoCheck()
 
     // TODO:  Possibly move all this into a preview manager object
     // Do this here as it may switch the background image
+    LayoutGroups.clear();
     AllModels.SetLayoutsNode(LayoutGroupsNode);  // provides easy access to layout names for the model class
     for(wxXmlNode* e=LayoutGroupsNode->GetChildren(); e!=NULL; e=e->GetNext() )
     {
@@ -192,8 +193,7 @@ wxString xLightsFrame::LoadEffectsFileNoCheck()
             wxString grp_name=e->GetAttribute("name");
             if (!grp_name.IsEmpty())
             {
-                LayoutGroup* grp = new LayoutGroup(grp_name.ToStdString());
-                grp->SetFromXml(e);
+                LayoutGroup* grp = new LayoutGroup(grp_name.ToStdString(), this, e);
                 LayoutGroups.push_back(grp);
                 layoutPanel->AddPreviewChoice(grp_name.ToStdString());
             }

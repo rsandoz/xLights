@@ -2,14 +2,16 @@
 #define LAYOUTGROUP_H
 
 #include <string>
+#include <wx/xml/xml.h>
 
 class xLightsFrame;
 class Model;
+class ModelPreview;
 
 class LayoutGroup
 {
     public:
-        LayoutGroup(const std::string & name);
+        LayoutGroup(const std::string & name, xLightsFrame* xl, wxXmlNode *node, wxString bkImage = "");
         virtual ~LayoutGroup();
 
         const std::string &GetName() const {return mName;}
@@ -25,6 +27,13 @@ class LayoutGroup
             return previewModels;
         }
 
+        void CheckPreviewClosed();
+        void MarkForPreviewDeletion();
+        void SetModelPreview(ModelPreview* preview) {mModelPreview = preview;}
+
+        bool GetPreviewActive() {return mPreviewActive;}
+        void SetPreviewActive();
+
     protected:
         wxXmlNode* LayoutGroupXml;
 
@@ -32,6 +41,10 @@ class LayoutGroup
         std::string mName;
         wxString mBackgroundImage;
         std::vector<Model*> previewModels;
+        bool mPreviewClosed;  // this flag is used to indicate preview window should be deleted upon first chance
+        bool mPreviewActive;
+        ModelPreview* mModelPreview;
+        xLightsFrame* xlights;
 };
 
 #endif // LAYOUTGROUP_H

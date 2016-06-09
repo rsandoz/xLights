@@ -1658,6 +1658,7 @@ void xLightsFrame::OnNotebook1PageChanged1(wxAuiNotebookEvent& event)
         //modelPreview->InitializePreview(mBackgroundImage,mBackgroundBrightness);
         //modelPreview->SetScaleBackgroundImage(mScaleBackgroundImage);
         UpdatePreview();
+        layoutPanel->SetLaunchPreviewButtonState();
         SetStatusText(_(""));
         EffectSettingsTimer.Stop();
     }

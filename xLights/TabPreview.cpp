@@ -13,6 +13,11 @@ void xLightsFrame::UpdatePreview()
     layoutPanel->UpdatePreview();
 }
 
+void xLightsFrame::UpdateLayoutButton()
+{
+    layoutPanel->SetLaunchPreviewButtonState();
+}
+
 void xLightsFrame::ShowPreviewTime(long ElapsedMSec)
 {
 

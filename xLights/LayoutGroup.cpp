@@ -6,9 +6,13 @@
 #include "xLightsMain.h"
 #include "models/Model.h"
 
-LayoutGroup::LayoutGroup(const std::string & name)
-: mName(name)
+LayoutGroup::LayoutGroup(const std::string & name, xLightsFrame* xl, wxXmlNode *node, wxString bkImage)
+: mName(name), mPreviewClosed(false), mPreviewActive(false), mModelPreview(nullptr), xlights(xl), LayoutGroupXml(node)
 {
+    if( bkImage != "" ) {
+        SetBackgroundImage( bkImage );
+    }
+    SetFromXml(node);
 }
 
 LayoutGroup::~LayoutGroup()
@@ -31,7 +35,41 @@ void LayoutGroup::SetFromXml(wxXmlNode* LayoutGroupNode)
     mBackgroundImage=LayoutGroupNode->GetAttribute("backgroundImage").ToStdString();
 }
 
-void LayoutGroup::SetModels(std::vector<Model*> &models) {
+void LayoutGroup::SetModels(std::vector<Model*> &models)
+{
     previewModels.clear();
-    previewModels = models;
+    for (auto it = models.begin(); it != models.end(); it++) {
+        previewModels.push_back(*it);
+    }
+}
+
+void LayoutGroup::CheckPreviewClosed()
+{
+    if( mPreviewClosed ) {
+        for (auto it = xlights->PreviewWindows.begin(); it != xlights->PreviewWindows.end(); it++) {
+            if( *it == mModelPreview ) {
+                delete mModelPreview;
+                mModelPreview = nullptr;
+                // TODO need to delete from the vector PreviewWindows
+                break;
+            }
+        }
+        mPreviewClosed = false;
+    }
+}
+
+void LayoutGroup::SetPreviewActive()
+{
+    mPreviewActive = true;
+    if( mModelPreview != nullptr ) {
+        mPreviewClosed = true;
+        CheckPreviewClosed();
+    }
+}
+
+void LayoutGroup::MarkForPreviewDeletion()
+{
+    mPreviewClosed = true;
+    mPreviewActive = false;
+    xlights->UpdateLayoutButton();
 }

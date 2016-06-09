@@ -8,6 +8,7 @@
 //*)
 
 class ModelPreview;
+class LayoutGroup;
 
 class PreviewPane: public wxDialog
 {
@@ -18,6 +19,8 @@ class PreviewPane: public wxDialog
 
 		wxPanel* GetPreviewPanel() {return PreviewPanel;}
 		wxFlexGridSizer* GetPreviewPanelSizer() {return PreviewPanelSizer;}
+
+		void SetLayoutGroup( LayoutGroup* grp );
 
 		//(*Declarations(PreviewPane)
 		wxFlexGridSizer* PreviewPanelSizer;
@@ -31,8 +34,11 @@ class PreviewPane: public wxDialog
 		//*)
 
 	private:
+        LayoutGroup* layout_grp;
+        PreviewPane* mPreviewPane;
 
 		//(*Handlers(PreviewPane)
+		void OnClose(wxCloseEvent& event);
 		//*)
 
 		DECLARE_EVENT_TABLE()

@@ -1234,7 +1234,10 @@ void xLightsFrame::TimerRgbSeq(long msec)
         ModelPreview* preview = *it;
         preview->Render(&SeqData[frame][0]);
     }
-
+    for (auto it = LayoutGroups.begin(); it != LayoutGroups.end(); it++) {
+        LayoutGroup* grp = (LayoutGroup*)(*it);
+        grp->CheckPreviewClosed();
+    }
 }
 
 void xLightsFrame::SetEffectControls(const std::string &modelName, const std::string &effectName,
