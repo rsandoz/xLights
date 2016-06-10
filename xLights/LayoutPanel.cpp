@@ -288,7 +288,7 @@ LayoutPanel::LayoutPanel(wxWindow* parent, xLightsFrame *xl, wxPanel* sequencer)
     ListBoxElementList->SetColumnWidth(1,10);
     ListBoxElementList->SetColumnWidth(2,10);
 
-    ToolSizer->SetCols(12);
+    ToolSizer->SetCols(13);
     AddModelButton("Arches", arches);
     AddModelButton("Candy Canes", canes);
     AddModelButton("Circle", circles);
@@ -296,6 +296,7 @@ LayoutPanel::LayoutPanel(wxWindow* parent, xLightsFrame *xl, wxPanel* sequencer)
     AddModelButton("Icicles", icicles_xpm);
     AddModelButton("Matrix", matrix);
     AddModelButton("Single Line", singleline);
+    AddModelButton("Spinner", spinner);
     AddModelButton("Star", star);
     AddModelButton("Tree", tree);
     AddModelButton("Window Frame", frame);
@@ -756,10 +757,11 @@ void LayoutPanel::UnSelectAllModels(bool addBkgProps)
             backgroundFile = preview_background_image;
             background = new wxImage(backgroundFile);
         }
-        propertyEditor->Append(new xlImageProperty("Background Image",
+        wxPGProperty* p = propertyEditor->Append(new xlImageProperty("Background Image",
                                                    "BkgImage",
                                                     preview_background_image,
                                                     *background));
+        p->SetAttribute(wxPG_FILE_WILDCARD, "Image files|*.png;*.bmp;*.jpg;*.gif|All files (*.*)|*.*");
         if( currentLayoutGroup == "Default" || currentLayoutGroup == "All Models" || currentLayoutGroup == "Unassigned" ) {
             propertyEditor->Append(new wxBoolProperty("Fill", "BkgFill", modelPreview->GetScaleBackgroundImage()))->SetAttribute("UseCheckbox", 1);
             wxPGProperty* prop = propertyEditor->Append(new wxUIntProperty("Width", "BkgSizeWidth", modelPreview->GetVirtualCanvasWidth()));
@@ -1814,7 +1816,7 @@ void LayoutPanel::OnCharHook(wxKeyEvent& event) {
             break;
 
         default:
-            //event.Skip();
+            event.Skip();
             break;
     }
 }
