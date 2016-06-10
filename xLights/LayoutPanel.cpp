@@ -446,6 +446,10 @@ void LayoutPanel::OnPropertyGridChange(wxPropertyGridEvent& event) {
             if (i & 0x0008) {
                 CallAfter(&LayoutPanel::refreshModelList);
             }
+            if (i & 0x0010) {
+                // Preview assignment change so model may not exist in current preview anymore
+                CallAfter(&RefreshLayout);
+            }
             if (i == 0) {
                 printf("Did not handle %s   %s\n",
                        event.GetPropertyName().ToStdString().c_str(),
@@ -470,6 +474,15 @@ void LayoutPanel::OnPropertyGridChanging(wxPropertyGridEvent& event) {
     } else {
         CreateUndoPoint("Background", "", name, event.GetProperty()->GetValue().GetString().ToStdString());
     }
+}
+
+void LayoutPanel::RefreshLayout()
+{
+    RemoveModelGroupFilters();
+    DeselectModelGroupList();
+    DeselectModelList();
+    xlights->UpdateModelsList();
+    ShowPropGrid(true);
 }
 
 void LayoutPanel::UpdatePreview()
@@ -850,12 +863,7 @@ void LayoutPanel::OnButtonSavePreviewClick(wxCommandEvent& event)
 
 void LayoutPanel::OnListBoxElementListItemSelect(wxListEvent& event)
 {
-    if( !mPropGridActive ) {
-        ModelSplitter->ReplaceWindow(ModelGroupWindow, propertyEditor );
-        propertyEditor->Show();
-        ModelGroupWindow->Hide();
-        mPropGridActive = true;
-    }
+    ShowPropGrid(true);
     int sel = ListBoxElementList->GetFirstSelected();
     if (sel == wxNOT_FOUND)
     {
@@ -1021,12 +1029,7 @@ void LayoutPanel::SetSelectedModelToGroupSelected()
 
 void LayoutPanel::OnPreviewLeftDown(wxMouseEvent& event)
 {
-    if( !mPropGridActive ) {
-        ModelSplitter->ReplaceWindow(ModelGroupWindow, propertyEditor);
-        ModelGroupWindow->Hide();
-        propertyEditor->Show();
-        mPropGridActive = true;
-    }
+    ShowPropGrid(true);
     modelPreview->SetFocus();
     int y = event.GetY();
     if (event.ControlDown())
@@ -2069,12 +2072,7 @@ void LayoutPanel::OnModelGroupPopup(wxCommandEvent& event)
                 selectedModel = nullptr;
                 mSelectedGroup = -1;
                 UnSelectAllModels();
-                if( !mPropGridActive ) {
-                    ModelSplitter->ReplaceWindow(ModelGroupWindow, propertyEditor);
-                    ModelGroupWindow->Hide();
-                    propertyEditor->Show();
-                    mPropGridActive = true;
-                }
+                ShowPropGrid(true);
                 xlights->UpdateModelsList();
                 MarkEffectsFileDirty();
             }
@@ -2132,12 +2130,7 @@ void LayoutPanel::OnModelGroupPopup(wxCommandEvent& event)
             xlights->UpdateModelsList();
             MarkEffectsFileDirty();
             model_grp_panel->UpdatePanel(name.ToStdString());
-            if( mPropGridActive ) {
-                ModelSplitter->ReplaceWindow(propertyEditor, ModelGroupWindow);
-                propertyEditor->Hide();
-                ModelGroupWindow->Show();
-                mPropGridActive = false;
-            }
+            ShowPropGrid(false);
         }
     }
 }
@@ -2162,22 +2155,22 @@ void LayoutPanel::SelectModelGroup(int index)
 
     std::string name = ListBoxModelGroups->GetItemText(index, 1).ToStdString();
     model_grp_panel->UpdatePanel(name);
-    if( mPropGridActive ) {
-        ModelSplitter->ReplaceWindow(propertyEditor, ModelGroupWindow);
-        propertyEditor->Hide();
-        ModelGroupWindow->Show();
-        mPropGridActive = false;
-    }
+    ShowPropGrid(false);
     xlights->UpdateModelsList(false);
 }
 
 void LayoutPanel::OnListBoxModelGroupsItemDeselect(wxListEvent& event)
 {
+    RemoveModelGroupFilters();
+    xlights->UpdateModelsList(false);
+}
+
+void LayoutPanel::RemoveModelGroupFilters()
+{
     for( int i = 0; i < ListBoxModelGroups->GetItemCount(); i++) {
         ListBoxModelGroups->SetChecked(i, false);
     }
     mSelectedGroup = -1;
-    xlights->UpdateModelsList(false);
 }
 
 void LayoutPanel::DeselectModelGroupList()
@@ -2262,12 +2255,7 @@ void LayoutPanel::OnChoiceLayoutGroupsSelect(wxCommandEvent& event)
 
             xlights->UpdateModelsList();
             MarkEffectsFileDirty();
-            if( !mPropGridActive ) {
-                ModelSplitter->ReplaceWindow(ModelGroupWindow, propertyEditor );
-                ModelGroupWindow->Hide();
-                propertyEditor->Show();
-                mPropGridActive = true;
-            }
+            ShowPropGrid(true);
         } else {
             SwitchChoiceToCurrentLayoutGroup();
             return;
@@ -2276,9 +2264,9 @@ void LayoutPanel::OnChoiceLayoutGroupsSelect(wxCommandEvent& event)
         currentLayoutGroup = choice_layout;
         mSelectedGroup = -1;
         UpdateModelList();
-        modelPreview->SetbackgroundImage(GetBackgroundImageForSelectedPreview());
-        UpdatePreview();
     }
+    modelPreview->SetbackgroundImage(GetBackgroundImageForSelectedPreview());
+    UpdatePreview();
     SetLaunchPreviewButtonState();
 
     wxConfigBase* config = wxConfigBase::Get();
@@ -2342,7 +2330,7 @@ void LayoutPanel::SetLaunchPreviewButtonState()
         for (auto it = xlights->LayoutGroups.begin(); it != xlights->LayoutGroups.end(); it++) {
             LayoutGroup* grp = (LayoutGroup*)(*it);
             if( currentLayoutGroup == grp->GetName() ) {
-                if( !grp->GetPreviewActive() ) {
+                if( grp->GetPreviewHidden() ) {
                     ButtonLaunchPreview->Enable(true);
                     ButtonLaunchPreview->Show();
                 }
@@ -2359,23 +2347,25 @@ void LayoutPanel::OnButtonLaunchPreviewClick(wxCommandEvent& event)
         if( currentLayoutGroup == grp->GetName() ) {
             grp->SetModels(modelPreview->GetModels());
 
-            PreviewPane* preview = new PreviewPane(xlights, wxID_ANY, wxDefaultPosition, wxSize(modelPreview->GetVirtualCanvasWidth(), modelPreview->GetVirtualCanvasHeight()));
-            wxPanel* panel = preview->GetPreviewPanel();
-            wxFlexGridSizer* panel_sizer = preview->GetPreviewPanelSizer();
-            ModelPreview* new_preview = new ModelPreview(panel, grp->GetModels(), false);
-            grp->SetModelPreview(new_preview);
-            panel_sizer->Add(new_preview, 1, wxALL | wxEXPAND, 0);
-            preview->SetLayoutGroup(grp);
+            if( !grp->GetPreviewCreated() ) {
+                PreviewPane* preview = new PreviewPane(xlights, wxID_ANY, wxDefaultPosition, wxSize(modelPreview->GetVirtualCanvasWidth(), modelPreview->GetVirtualCanvasHeight()));
+                wxPanel* panel = preview->GetPreviewPanel();
+                wxFlexGridSizer* panel_sizer = preview->GetPreviewPanelSizer();
+                ModelPreview* new_preview = new ModelPreview(panel, grp->GetModels(), false);
+                new_preview->SetPreviewPane(preview);
+                grp->SetModelPreview(new_preview);
+                panel_sizer->Add(new_preview, 1, wxALL | wxEXPAND, 0);
+                preview->SetLayoutGroup(grp);
+
+                xlights->PreviewWindows.push_back(new_preview);
+                new_preview->InitializePreview(previewBackgroundFile,modelPreview->GetBackgroundBrightness());
+                new_preview->SetScaleBackgroundImage(modelPreview->GetScaleBackgroundImage());
+                new_preview->SetCanvasSize(modelPreview->GetVirtualCanvasWidth(),modelPreview->GetVirtualCanvasHeight());
+                new_preview->SetVirtualCanvasSize(modelPreview->GetVirtualCanvasWidth(), modelPreview->GetVirtualCanvasHeight());
+                preview->SetSize(modelPreview->GetVirtualCanvasWidth(),modelPreview->GetVirtualCanvasHeight());
+            }
             grp->SetPreviewActive();
             SetLaunchPreviewButtonState();
-
-            xlights->PreviewWindows.push_back(new_preview);
-            new_preview->InitializePreview(previewBackgroundFile,modelPreview->GetBackgroundBrightness());
-            new_preview->SetScaleBackgroundImage(modelPreview->GetScaleBackgroundImage());
-            new_preview->SetCanvasSize(modelPreview->GetVirtualCanvasWidth(),modelPreview->GetVirtualCanvasHeight());
-            new_preview->SetVirtualCanvasSize(modelPreview->GetVirtualCanvasWidth(), modelPreview->GetVirtualCanvasHeight());
-            preview->Show();
-            preview->SetSize(modelPreview->GetVirtualCanvasWidth(),modelPreview->GetVirtualCanvasHeight());
             break;
         }
     }
@@ -2408,10 +2398,35 @@ void LayoutPanel::DeleteCurrentPreview()
                 break;
             }
         }
+        // change any existing assignments to this preview to be unassigned
+        for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
+            Model *model = it->second;
+            if( model->GetLayoutGroup() == currentLayoutGroup) {
+                model->SetLayoutGroup("Unassigned");
+            }
+        }
+
         currentLayoutGroup = "Default";
         ChoiceLayoutGroups->SetSelection(0);
+
         UpdateModelList();
         modelPreview->SetbackgroundImage(GetBackgroundImageForSelectedPreview());
         UpdatePreview();
     }
 }
+
+void LayoutPanel::ShowPropGrid(bool show)
+{
+    if( !mPropGridActive && show ) {
+        ModelSplitter->ReplaceWindow(ModelGroupWindow, propertyEditor);
+        ModelGroupWindow->Hide();
+        propertyEditor->Show();
+        mPropGridActive = true;
+    } else if( mPropGridActive && !show) {
+        ModelSplitter->ReplaceWindow(propertyEditor, ModelGroupWindow);
+        propertyEditor->Hide();
+        ModelGroupWindow->Show();
+        mPropGridActive = false;
+    }
+}
+

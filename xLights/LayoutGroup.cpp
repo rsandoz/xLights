@@ -7,7 +7,7 @@
 #include "models/Model.h"
 
 LayoutGroup::LayoutGroup(const std::string & name, xLightsFrame* xl, wxXmlNode *node, wxString bkImage)
-: mName(name), mPreviewClosed(false), mPreviewActive(false), mModelPreview(nullptr), xlights(xl), LayoutGroupXml(node)
+: mName(name), mPreviewHidden(true), mPreviewCreated(false), mModelPreview(nullptr), xlights(xl), LayoutGroupXml(node)
 {
     if( bkImage != "" ) {
         SetBackgroundImage( bkImage );
@@ -18,9 +18,13 @@ LayoutGroup::LayoutGroup(const std::string & name, xLightsFrame* xl, wxXmlNode *
 LayoutGroup::~LayoutGroup()
 {
     previewModels.clear();
-    if( mModelPreview != nullptr ) {
-        mPreviewClosed = true;
-        CheckPreviewClosed();
+    for (auto it = xlights->PreviewWindows.begin(); it != xlights->PreviewWindows.end(); it++) {
+        if( *it == mModelPreview ) {
+            xlights->PreviewWindows.erase(it);
+            delete mModelPreview;
+            mModelPreview = nullptr;
+            break;
+        }
     }
 }
 
@@ -32,7 +36,10 @@ void LayoutGroup::SetBackgroundImage(const wxString &filename)
         LayoutGroupXml->AddAttribute("backgroundImage", mBackgroundImage);
         if( mModelPreview != nullptr ) {
             mModelPreview->SetbackgroundImage(mBackgroundImage);
-            mModelPreview->Refresh();
+            if( !mPreviewHidden ) {
+                mModelPreview->Refresh();
+                mModelPreview->Update();
+            }
         }
     }
 }
@@ -56,33 +63,16 @@ void LayoutGroup::SetModels(std::vector<Model*> &models)
     }
 }
 
-void LayoutGroup::CheckPreviewClosed()
+void LayoutGroup::PreviewClosed()
 {
-    if( mPreviewClosed ) {
-        for (auto it = xlights->PreviewWindows.begin(); it != xlights->PreviewWindows.end(); it++) {
-            if( *it == mModelPreview ) {
-                delete mModelPreview;
-                mModelPreview = nullptr;
-                // TODO need to delete from the vector PreviewWindows
-                break;
-            }
-        }
-        mPreviewClosed = false;
-    }
+    mPreviewHidden = true;
+    xlights->UpdateLayoutButton();
 }
 
 void LayoutGroup::SetPreviewActive()
 {
-    mPreviewActive = true;
-    if( mModelPreview != nullptr ) {
-        mPreviewClosed = true;
-        CheckPreviewClosed();
-    }
+    mPreviewCreated = true;
+    mPreviewHidden = false;
+    mModelPreview->SetActive();
 }
 
-void LayoutGroup::MarkForPreviewDeletion()
-{
-    mPreviewClosed = true;
-    mPreviewActive = false;
-    xlights->UpdateLayoutButton();
-}

@@ -64,6 +64,8 @@ public:
     }
 
     void SetPreviewPane(PreviewPane* pane) {mPreviewPane = pane;}
+    void SetActive();
+    bool GetActive();
 
 protected:
     virtual void InitializeGLCanvas();

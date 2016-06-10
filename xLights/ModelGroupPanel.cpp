@@ -326,4 +326,5 @@ void ModelGroupPanel::OnChoicePreviewsSelect(wxCommandEvent& event)
     xlights->UpdateModelsList(true);
     xlights->UnsavedRgbEffectsChanges = true;
     xlights->UpdatePreview();
+    xlights->RefreshLayout();
 }

@@ -1232,11 +1232,9 @@ void xLightsFrame::TimerRgbSeq(long msec)
     sPreview2->Render(&SeqData[frame][0]);
     for (auto it = PreviewWindows.begin(); it != PreviewWindows.end(); it++) {
         ModelPreview* preview = *it;
-        preview->Render(&SeqData[frame][0]);
-    }
-    for (auto it = LayoutGroups.begin(); it != LayoutGroups.end(); it++) {
-        LayoutGroup* grp = (LayoutGroup*)(*it);
-        grp->CheckPreviewClosed();
+        if( preview->GetActive() ) {
+            preview->Render(&SeqData[frame][0]);
+        }
     }
 }
 

@@ -21,6 +21,7 @@ class PreviewPane: public wxDialog
 		wxFlexGridSizer* GetPreviewPanelSizer() {return PreviewPanelSizer;}
 
 		void SetLayoutGroup( LayoutGroup* grp );
+		bool GetActive();
 
 		//(*Declarations(PreviewPane)
 		wxFlexGridSizer* PreviewPanelSizer;

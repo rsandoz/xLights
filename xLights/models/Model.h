@@ -62,6 +62,7 @@ public:
      *     0x0002  -  Mark settings as "dirty"/"changed"
      *     0x0004  -  Rebuild the property grid
      *     0x0008  -  Rebuild the model list
+     *     0x0010  -  Update all model lists
      */
     virtual int OnPropertyGridChange(wxPropertyGridInterface *grid, wxPropertyGridEvent& event);
 protected:

@@ -28,11 +28,11 @@ class LayoutGroup
             return previewModels;
         }
 
-        void CheckPreviewClosed();
-        void MarkForPreviewDeletion();
+        void PreviewClosed();
         void SetModelPreview(ModelPreview* preview) {mModelPreview = preview;}
 
-        bool GetPreviewActive() {return mPreviewActive;}
+        bool GetPreviewHidden() {return mPreviewHidden;}
+        bool GetPreviewCreated() {return mPreviewCreated;}
         void SetPreviewActive();
 
     protected:
@@ -42,8 +42,8 @@ class LayoutGroup
         std::string mName;
         wxString mBackgroundImage;
         std::vector<Model*> previewModels;
-        bool mPreviewClosed;  // this flag is used to indicate preview window should be deleted upon first chance
-        bool mPreviewActive;
+        bool mPreviewHidden;
+        bool mPreviewCreated;
         ModelPreview* mModelPreview;
         xLightsFrame* xlights;
 };

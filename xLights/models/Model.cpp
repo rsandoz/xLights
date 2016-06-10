@@ -527,7 +527,7 @@ int Model::OnPropertyGridChange(wxPropertyGridInterface *grid, wxPropertyGridEve
         ModelXml->DeleteAttribute("LayoutGroup");
         ModelXml->AddAttribute("LayoutGroup", layout_group);
         IncrementChangeCount();
-        return 3 | 0x0008;
+        return 3 | 0x0010;
     }
     int i = GetModelScreenLocation().OnPropertyGridChange(grid, event);
     if (i & 0x2) {

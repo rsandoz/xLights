@@ -226,6 +226,7 @@ class LayoutPanel: public wxPanel
         void UpdateModelList(bool update_groups = true);
         void AddModelGroupItem(wxString name, ModelGroup *grp, bool selected);
         void SetLaunchPreviewButtonState();
+        void RefreshLayout();
 
     private:
         wxImage *background;
@@ -244,6 +245,8 @@ class LayoutPanel: public wxPanel
 		const wxString& GetBackgroundImageForSelectedPreview();
         void SwitchChoiceToCurrentLayoutGroup();
         void DeleteCurrentPreview();
+        void RemoveModelGroupFilters();
+        void ShowPropGrid(bool show);
 };
 
 #endif

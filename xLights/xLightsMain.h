@@ -1265,6 +1265,7 @@ public:
     int GetTotalChannels() { return _totalChannels; };
     void ForceSequencerRefresh();
     void UpdateLayoutButton();
+    void RefreshLayout();
 
 private:
 

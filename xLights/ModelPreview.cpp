@@ -12,7 +12,7 @@
 
 #include "ModelPreview.h"
 #include "models/Model.h"
-
+#include "PreviewPane.h"
 #include "DrawGLUtils.h"
 
 
@@ -235,6 +235,14 @@ double ModelPreview::calcPixelSize(double i) {
     return d;
 }
 
+bool ModelPreview::GetActive()
+{
+    return mPreviewPane->GetActive();
+}
+
+void ModelPreview::SetActive() {
+    mPreviewPane->Show();
+}
 
 bool ModelPreview::StartDrawing(wxDouble pointSize)
 {

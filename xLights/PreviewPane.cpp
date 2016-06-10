@@ -52,12 +52,17 @@ PreviewPane::~PreviewPane()
 
 void PreviewPane::OnClose(wxCloseEvent& event)
 {
-    layout_grp->MarkForPreviewDeletion();
-    event.Skip();
+    layout_grp->PreviewClosed();
+    this->Hide();
 }
 
 void PreviewPane::SetLayoutGroup( LayoutGroup* grp )
 {
     layout_grp = grp;
     SetTitle(grp->GetName());
+}
+
+bool PreviewPane::GetActive()
+{
+    return !layout_grp->GetPreviewHidden();
 }

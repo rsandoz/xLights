@@ -18,6 +18,11 @@ void xLightsFrame::UpdateLayoutButton()
     layoutPanel->SetLaunchPreviewButtonState();
 }
 
+void xLightsFrame::RefreshLayout()
+{
+    layoutPanel->RefreshLayout();
+}
+
 void xLightsFrame::ShowPreviewTime(long ElapsedMSec)
 {
 
