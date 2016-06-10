@@ -30,6 +30,7 @@ class LayoutGroup
 
         void PreviewClosed();
         void SetModelPreview(ModelPreview* preview) {mModelPreview = preview;}
+        ModelPreview* GetModelPreview() {return mModelPreview;}
 
         bool GetPreviewHidden() {return mPreviewHidden;}
         bool GetPreviewCreated() {return mPreviewCreated;}

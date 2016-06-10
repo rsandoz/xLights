@@ -538,56 +538,22 @@ void LayoutPanel::UpdateModelList(bool update_groups) {
     UnSelectAllModels();
     ListBoxElementList->DeleteAllItems();
 
-    std::set<std::string> modelsAdded;
     std::vector<Model *> models;
-    if( mSelectedGroup == -1 ) {
-        for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
-            Model *model = it->second;
-            if (model->GetDisplayAs() != "ModelGroup") {
-                if (currentLayoutGroup == "All Models" || model->GetLayoutGroup() == currentLayoutGroup || model->GetLayoutGroup() == "All Previews" && currentLayoutGroup != "Unassigned") {
-                    models.push_back(model);
-                    modelsAdded.insert(model->name);
-                }
-            }
-        }
+    std::vector<Model *> dummy_models;
 
-        // add in any models that were not in preview but belong to a group that is in the preview
-        for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
-            Model *model = it->second;
-            if (model->GetDisplayAs() == "ModelGroup") {
-                ModelGroup *grp = (ModelGroup*)(model);
-                if (currentLayoutGroup == "All Models" || model->GetLayoutGroup() == currentLayoutGroup || model->GetLayoutGroup() == "All Previews" && currentLayoutGroup != "Unassigned") {
-                    for (auto it = grp->ModelNames().begin(); it != grp->ModelNames().end(); it++) {
-                        if (modelsAdded.find(*it) == modelsAdded.end()) {
-                            Model *m = xlights->AllModels[*it];
-                            if (m != nullptr) {
-                                modelsAdded.insert(*it);
-                                models.push_back(m);
-                            }
-                        }
-                    }
-                }
-            }
+    // Update all the other previews
+    for (auto it = xlights->LayoutGroups.begin(); it != xlights->LayoutGroups.end(); it++) {
+        LayoutGroup* grp = (LayoutGroup*)(*it);
+        if( grp->GetName() == currentLayoutGroup ) {
+            UpdateModelsForPreview( grp->GetName(), grp, models );
+        } else {
+            UpdateModelsForPreview( grp->GetName(), grp, dummy_models );
         }
-    } else {
-        std::string name = ListBoxModelGroups->GetItemText(mSelectedGroup, 1).ToStdString();
-        for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
-            Model *model = it->second;
-            if (model->GetDisplayAs() == "ModelGroup") {
-                ModelGroup *grp = (ModelGroup*)(model);
-                if( grp->name == name ) {
-                    for (auto it = grp->ModelNames().begin(); it != grp->ModelNames().end(); it++) {
-                        if (modelsAdded.find(*it) == modelsAdded.end()) {
-                            Model *m = xlights->AllModels[*it];
-                            if (m != nullptr) {
-                                modelsAdded.insert(*it);
-                                models.push_back(m);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    }
+
+    // These options are not real layout groups so need to run model building call for them
+    if (currentLayoutGroup == "Default" || currentLayoutGroup == "All Models" || currentLayoutGroup == "Unassigned") {
+        UpdateModelsForPreview( currentLayoutGroup, nullptr, models );
     }
 
     for (auto it = models.begin(); it != models.end(); it++) {
@@ -616,10 +582,75 @@ void LayoutPanel::UpdateModelList(bool update_groups) {
         ListBoxElementList->SetColumnWidth(0,wxLIST_AUTOSIZE_USEHEADER);
         colSizesSet = true;
     }
+
     modelPreview->SetModels(models);
     UpdatePreview();
+}
 
-    // TODO: update models in any active previews.  All previews can be affected by a model change
+void LayoutPanel::UpdateModelsForPreview(const std::string &group, LayoutGroup* layout_grp, std::vector<Model *> &prev_models)
+{
+    std::set<std::string> modelsAdded;
+    if( mSelectedGroup == -1 ) {
+        for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
+            Model *model = it->second;
+            if (model->GetDisplayAs() != "ModelGroup") {
+                if (group == "All Models" || model->GetLayoutGroup() == group || model->GetLayoutGroup() == "All Previews" && group != "Unassigned") {
+                    prev_models.push_back(model);
+                    modelsAdded.insert(model->name);
+                }
+            }
+        }
+
+        // add in any models that were not in preview but belong to a group that is in the preview
+        for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
+            Model *model = it->second;
+            if (model->GetDisplayAs() == "ModelGroup") {
+                ModelGroup *grp = (ModelGroup*)(model);
+                if (group == "All Models" || model->GetLayoutGroup() == group || model->GetLayoutGroup() == "All Previews" && group != "Unassigned") {
+                    for (auto it = grp->ModelNames().begin(); it != grp->ModelNames().end(); it++) {
+                        if (modelsAdded.find(*it) == modelsAdded.end()) {
+                            Model *m = xlights->AllModels[*it];
+                            if (m != nullptr) {
+                                modelsAdded.insert(*it);
+                                prev_models.push_back(m);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        std::string name = ListBoxModelGroups->GetItemText(mSelectedGroup, 1).ToStdString();
+        for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
+            Model *model = it->second;
+            if (model->GetDisplayAs() == "ModelGroup") {
+                ModelGroup *grp = (ModelGroup*)(model);
+                if( grp->name == name ) {
+                    for (auto it = grp->ModelNames().begin(); it != grp->ModelNames().end(); it++) {
+                        if (modelsAdded.find(*it) == modelsAdded.end()) {
+                            Model *m = xlights->AllModels[*it];
+                            if (m != nullptr) {
+                                modelsAdded.insert(*it);
+                                prev_models.push_back(m);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // only run this for layout group previews
+    if( layout_grp != nullptr ) {
+        layout_grp->SetModels(prev_models);
+        ModelPreview* preview = layout_grp->GetModelPreview();
+        if( layout_grp->GetPreviewCreated() ) {
+            preview->SetModels(layout_grp->GetModels());
+            if( preview->GetActive() ) {
+                preview->Refresh();
+                preview->Update();
+            }
+        }
+    }
 }
 
 void LayoutPanel::AddModelGroupItem(wxString name, ModelGroup *grp, bool selected)
