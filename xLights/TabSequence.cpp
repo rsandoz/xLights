@@ -182,7 +182,6 @@ wxString xLightsFrame::LoadEffectsFileNoCheck()
     }
     SetPreviewBackgroundImage(mBackgroundImage);
 
-    // TODO:  Possibly move all this into a preview manager object
     // Do this here as it may switch the background image
     LayoutGroups.clear();
     AllModels.SetLayoutsNode(LayoutGroupsNode);  // provides easy access to layout names for the model class
@@ -195,6 +194,7 @@ wxString xLightsFrame::LoadEffectsFileNoCheck()
             {
                 LayoutGroup* grp = new LayoutGroup(grp_name.ToStdString(), this, e);
                 LayoutGroups.push_back(grp);
+                AddPreviewOption(grp);
                 layoutPanel->AddPreviewChoice(grp_name.ToStdString());
             }
         }
@@ -407,7 +407,7 @@ void xLightsFrame::UpdateModelsList(bool update_groups)
 {
     playModel = nullptr;
     PreviewModels.clear();
-    layoutPanel->modelPreview->GetModels().clear();
+    layoutPanel->GetMainPreview()->GetModels().clear();
 
     AllModels.LoadModels(ModelsNode,
                          modelPreview->GetVirtualCanvasWidth(),

@@ -83,7 +83,7 @@
 							<growablerows>1</growablerows>
 							<object class="sizeritem">
 								<object class="wxFlexGridSizer" variable="FlexGridSizer1" member="no">
-									<cols>4</cols>
+									<cols>3</cols>
 									<growablecols>0</growablecols>
 									<object class="sizeritem">
 										<object class="wxFlexGridSizer" variable="ToolSizer" member="yes">
@@ -114,16 +114,6 @@
 											<handler function="OnChoiceLayoutGroupsSelect" entry="EVT_CHOICE" />
 										</object>
 										<flag>wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL</flag>
-										<border>5</border>
-										<option>1</option>
-									</object>
-									<object class="sizeritem">
-										<object class="wxButton" name="ID_BUTTON_LAUNCH_PREVIEW" variable="ButtonLaunchPreview" member="yes">
-											<label>Launch Preview</label>
-											<enabled>0</enabled>
-											<handler function="OnButtonLaunchPreviewClick" entry="EVT_BUTTON" />
-										</object>
-										<flag>wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
 										<border>5</border>
 										<option>1</option>
 									</object>

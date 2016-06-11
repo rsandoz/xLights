@@ -8,7 +8,7 @@ class xLightsFrame;
 class Model;
 class ModelPreview;
 
-class LayoutGroup
+class LayoutGroup : public wxObject
 {
     public:
         LayoutGroup(const std::string & name, xLightsFrame* xl, wxXmlNode *node, wxString bkImage = "");
@@ -28,13 +28,16 @@ class LayoutGroup
             return previewModels;
         }
 
-        void PreviewClosed();
         void SetModelPreview(ModelPreview* preview) {mModelPreview = preview;}
         ModelPreview* GetModelPreview() {return mModelPreview;}
 
         bool GetPreviewHidden() {return mPreviewHidden;}
         bool GetPreviewCreated() {return mPreviewCreated;}
-        void SetPreviewActive();
+        void SetPreviewActive(bool show);
+        const long AddToPreviewMenu(wxMenu* preview_menu);
+        wxMenuItem* GetMenuItem() {return mMenuItemPreview;}
+        void ShowHidePreview();
+        const long GetMenuId() {return id_menu_item;}
 
     protected:
         wxXmlNode* LayoutGroupXml;
@@ -47,6 +50,9 @@ class LayoutGroup
         bool mPreviewCreated;
         ModelPreview* mModelPreview;
         xLightsFrame* xlights;
+        wxMenuItem* mMenuItemPreview;
+        const long id_menu_item;
+
 };
 
 #endif // LAYOUTGROUP_H

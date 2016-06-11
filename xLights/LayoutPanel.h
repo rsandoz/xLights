@@ -55,7 +55,6 @@ class LayoutPanel: public wxPanel
 		wxCheckBox* CheckBoxOverlap;
 		wxPanel* SecondPanel;
 		wxButton* ButtonSavePreview;
-		wxButton* ButtonLaunchPreview;
 		wxSplitterWindow* GroupSplitter;
 		wxSplitterWindow* ModelSplitter;
 		wxPanel* PreviewGLPanel;
@@ -76,7 +75,6 @@ class LayoutPanel: public wxPanel
 		static const long ID_PANEL5;
 		static const long ID_STATICTEXT1;
 		static const long ID_CHOICE_PREVIEWS;
-		static const long ID_BUTTON_LAUNCH_PREVIEW;
 		static const long ID_PANEL1;
 		static const long ID_SPLITTERWINDOW2;
 		//*)
@@ -141,6 +139,7 @@ class LayoutPanel: public wxPanel
         void UnSelectAllModels(bool addBkgProps = true);
         void SetupPropGrid(Model *model);
         void AddPreviewChoice(const std::string &name);
+        ModelPreview* GetMainPreview() {return modelPreview;}
 
     protected:
         void ExportModel();
@@ -223,13 +222,12 @@ class LayoutPanel: public wxPanel
         void CreateUndoPoint(const std::string &type, const std::string &model, const std::string &key = "", const std::string &data = "");
     public:
         xLightsFrame *xlights;
-        ModelPreview *modelPreview;
         void UpdateModelList(bool update_groups = true);
         void AddModelGroupItem(wxString name, ModelGroup *grp, bool selected);
-        void SetLaunchPreviewButtonState();
         void RefreshLayout();
 
     private:
+        ModelPreview *modelPreview;
         wxImage *background;
         wxString backgroundFile;
         wxString previewBackgroundFile;

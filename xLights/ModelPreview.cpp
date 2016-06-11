@@ -240,8 +240,12 @@ bool ModelPreview::GetActive()
     return mPreviewPane->GetActive();
 }
 
-void ModelPreview::SetActive() {
-    mPreviewPane->Show();
+void ModelPreview::SetActive(bool show) {
+    if( show ) {
+        mPreviewPane->Show();
+    } else {
+        mPreviewPane->Hide();
+    }
 }
 
 bool ModelPreview::StartDrawing(wxDouble pointSize)

@@ -13,11 +13,6 @@ void xLightsFrame::UpdatePreview()
     layoutPanel->UpdatePreview();
 }
 
-void xLightsFrame::UpdateLayoutButton()
-{
-    layoutPanel->SetLaunchPreviewButtonState();
-}
-
 void xLightsFrame::RefreshLayout()
 {
     layoutPanel->RefreshLayout();

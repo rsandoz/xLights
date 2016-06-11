@@ -64,7 +64,7 @@ public:
     }
 
     void SetPreviewPane(PreviewPane* pane) {mPreviewPane = pane;}
-    void SetActive();
+    void SetActive(bool show);
     bool GetActive();
 
 protected:

@@ -1,5 +1,6 @@
 #include "PreviewPane.h"
 #include "LayoutGroup.h"
+#include <wx/wx.h>
 
 //(*InternalHeaders(PreviewPane)
 #include <wx/intl.h>
@@ -52,8 +53,8 @@ PreviewPane::~PreviewPane()
 
 void PreviewPane::OnClose(wxCloseEvent& event)
 {
-    layout_grp->PreviewClosed();
-    this->Hide();
+    layout_grp->SetPreviewActive(false);
+    layout_grp->GetMenuItem()->Check(false);
 }
 
 void PreviewPane::SetLayoutGroup( LayoutGroup* grp )

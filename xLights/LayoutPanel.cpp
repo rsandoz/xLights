@@ -44,7 +44,6 @@ const long LayoutPanel::ID_BUTTON_SAVE_PREVIEW = wxNewId();
 const long LayoutPanel::ID_PANEL5 = wxNewId();
 const long LayoutPanel::ID_STATICTEXT1 = wxNewId();
 const long LayoutPanel::ID_CHOICE_PREVIEWS = wxNewId();
-const long LayoutPanel::ID_BUTTON_LAUNCH_PREVIEW = wxNewId();
 const long LayoutPanel::ID_PANEL1 = wxNewId();
 const long LayoutPanel::ID_SPLITTERWINDOW2 = wxNewId();
 //*)
@@ -177,7 +176,7 @@ LayoutPanel::LayoutPanel(wxWindow* parent, xLightsFrame *xl, wxPanel* sequencer)
 	PreviewGLSizer = new wxFlexGridSizer(2, 1, 0, 0);
 	PreviewGLSizer->AddGrowableCol(0);
 	PreviewGLSizer->AddGrowableRow(1);
-	FlexGridSizer1 = new wxFlexGridSizer(0, 4, 0, 0);
+	FlexGridSizer1 = new wxFlexGridSizer(0, 3, 0, 0);
 	FlexGridSizer1->AddGrowableCol(0);
 	ToolSizer = new wxFlexGridSizer(0, 10, 0, 0);
 	FlexGridSizer1->Add(ToolSizer, 1, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 3);
@@ -187,9 +186,6 @@ LayoutPanel::LayoutPanel(wxWindow* parent, xLightsFrame *xl, wxPanel* sequencer)
 	FlexGridSizer1->Add(StaticText1, 1, wxLEFT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 40);
 	ChoiceLayoutGroups = new wxChoice(PreviewGLPanel, ID_CHOICE_PREVIEWS, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE_PREVIEWS"));
 	FlexGridSizer1->Add(ChoiceLayoutGroups, 1, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
-	ButtonLaunchPreview = new wxButton(PreviewGLPanel, ID_BUTTON_LAUNCH_PREVIEW, _("Launch Preview"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_LAUNCH_PREVIEW"));
-	ButtonLaunchPreview->Disable();
-	FlexGridSizer1->Add(ButtonLaunchPreview, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
 	PreviewGLSizer->Add(FlexGridSizer1, 1, wxALL|wxALIGN_LEFT, 3);
 	PreviewGLPanel->SetSizer(PreviewGLSizer);
 	PreviewGLSizer->Fit(PreviewGLPanel);
@@ -211,7 +207,6 @@ LayoutPanel::LayoutPanel(wxWindow* parent, xLightsFrame *xl, wxPanel* sequencer)
 	Connect(ID_CHECKBOXOVERLAP,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&LayoutPanel::OnCheckBoxOverlapClick);
 	Connect(ID_BUTTON_SAVE_PREVIEW,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&LayoutPanel::OnButtonSavePreviewClick);
 	Connect(ID_CHOICE_PREVIEWS,wxEVT_COMMAND_CHOICE_SELECTED,(wxObjectEventFunction)&LayoutPanel::OnChoiceLayoutGroupsSelect);
-	Connect(ID_BUTTON_LAUNCH_PREVIEW,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&LayoutPanel::OnButtonLaunchPreviewClick);
 	Connect(ID_SPLITTERWINDOW2,wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED,(wxObjectEventFunction)&LayoutPanel::OnSplitterWindowSashPosChanged);
 	//*)
 
@@ -2283,6 +2278,7 @@ void LayoutPanel::OnChoiceLayoutGroupsSelect(wxCommandEvent& event)
             currentLayoutGroup = name.ToStdString();
             LayoutGroup* grp = new LayoutGroup(name.ToStdString(), xlights, node, xlights->GetDefaultPreviewBackgroundImage());
             xlights->LayoutGroups.push_back(grp);
+            xlights->AddPreviewOption(grp);
             ChoiceLayoutGroups->Insert(name, ChoiceLayoutGroups->GetCount()-1);
             ChoiceLayoutGroups->SetSelection(ChoiceLayoutGroups->GetCount()-2);
 
@@ -2300,7 +2296,6 @@ void LayoutPanel::OnChoiceLayoutGroupsSelect(wxCommandEvent& event)
     }
     modelPreview->SetbackgroundImage(GetBackgroundImageForSelectedPreview());
     UpdatePreview();
-    SetLaunchPreviewButtonState();
 
     wxConfigBase* config = wxConfigBase::Get();
     config->Write("CurrentLayoutGroup", (wxString)currentLayoutGroup );
@@ -2321,7 +2316,6 @@ void LayoutPanel::AddPreviewChoice(const std::string &name)
             {
                 ChoiceLayoutGroups->SetSelection(i);
                 modelPreview->SetbackgroundImage(GetBackgroundImageForSelectedPreview());
-                SetLaunchPreviewButtonState();
                 UpdatePreview();
                 break;
             }
@@ -2355,60 +2349,9 @@ void LayoutPanel::SwitchChoiceToCurrentLayoutGroup() {
     }
 }
 
-void LayoutPanel::SetLaunchPreviewButtonState()
-{
-    ButtonLaunchPreview->Enable(false);
-    ButtonLaunchPreview->Hide();
-    if( currentLayoutGroup != "Default" && currentLayoutGroup != "All Models" && currentLayoutGroup != "Unassigned" ) {
-        for (auto it = xlights->LayoutGroups.begin(); it != xlights->LayoutGroups.end(); it++) {
-            LayoutGroup* grp = (LayoutGroup*)(*it);
-            if( currentLayoutGroup == grp->GetName() ) {
-                if( grp->GetPreviewHidden() ) {
-                    ButtonLaunchPreview->Enable(true);
-                    ButtonLaunchPreview->Show();
-                }
-                break;
-            }
-        }
-    }
-}
-
-void LayoutPanel::OnButtonLaunchPreviewClick(wxCommandEvent& event)
-{
-    for (auto it = xlights->LayoutGroups.begin(); it != xlights->LayoutGroups.end(); it++) {
-        LayoutGroup* grp = (LayoutGroup*)(*it);
-        if( currentLayoutGroup == grp->GetName() ) {
-            grp->SetModels(modelPreview->GetModels());
-
-            if( !grp->GetPreviewCreated() ) {
-                PreviewPane* preview = new PreviewPane(xlights, wxID_ANY, wxDefaultPosition, wxSize(modelPreview->GetVirtualCanvasWidth(), modelPreview->GetVirtualCanvasHeight()));
-                wxPanel* panel = preview->GetPreviewPanel();
-                wxFlexGridSizer* panel_sizer = preview->GetPreviewPanelSizer();
-                ModelPreview* new_preview = new ModelPreview(panel, grp->GetModels(), false);
-                new_preview->SetPreviewPane(preview);
-                grp->SetModelPreview(new_preview);
-                panel_sizer->Add(new_preview, 1, wxALL | wxEXPAND, 0);
-                preview->SetLayoutGroup(grp);
-
-                xlights->PreviewWindows.push_back(new_preview);
-                new_preview->InitializePreview(previewBackgroundFile,modelPreview->GetBackgroundBrightness());
-                new_preview->SetScaleBackgroundImage(modelPreview->GetScaleBackgroundImage());
-                new_preview->SetCanvasSize(modelPreview->GetVirtualCanvasWidth(),modelPreview->GetVirtualCanvasHeight());
-                new_preview->SetVirtualCanvasSize(modelPreview->GetVirtualCanvasWidth(), modelPreview->GetVirtualCanvasHeight());
-                preview->SetSize(modelPreview->GetVirtualCanvasWidth(),modelPreview->GetVirtualCanvasHeight());
-            }
-            grp->SetPreviewActive();
-            SetLaunchPreviewButtonState();
-            break;
-        }
-    }
-}
-
 void LayoutPanel::DeleteCurrentPreview()
 {
     if (wxMessageBox("Are you sure you want to delete the " + currentLayoutGroup + " preview?", "Confirm Delete?", wxICON_QUESTION | wxYES_NO) == wxYES) {
-        ButtonLaunchPreview->Enable(false);
-        ButtonLaunchPreview->Hide();
         for (auto it = xlights->LayoutGroups.begin(); it != xlights->LayoutGroups.end(); it++) {
             LayoutGroup* grp = (LayoutGroup*)(*it);
             if (grp != nullptr) {
