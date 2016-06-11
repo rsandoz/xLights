@@ -237,6 +237,72 @@ void xLightsFrame::LoadEffectsFile()
             }
         }
     }
+    if (version < "0006") {
+        // need to convert models/groups to remove MyDisplay and add preview assignments
+        for (wxXmlNode *model = ModelsNode->GetChildren(); model != nullptr; model = model->GetNext()) {
+            if (model->GetName() == "model") {
+                std::string my_display = model->GetAttribute("MyDisplay").ToStdString();
+                std::string layout_group = "Unassigned";
+                if ( my_display == "1" ) {
+                    layout_group = "Default";
+                }
+                model->DeleteAttribute("MyDisplay");
+                model->AddAttribute("LayoutGroup", layout_group);
+             }
+        }
+        // parse groups once to figure out if any of them are selected
+        bool groups_are_selected = false;
+        for (wxXmlNode *group = ModelGroupsNode->GetChildren(); group != nullptr; group = group->GetNext()) {
+            if (group->GetName() == "modelGroup") {
+                std::string selected = group->GetAttribute("selected").ToStdString();
+                if ( selected == "1" ) {
+                    groups_are_selected = true;
+                    break;
+                }
+             }
+        }
+        // if no groups are selected then models remain as set above and all groups goto Default
+        if( !groups_are_selected ) {
+            for (wxXmlNode *group = ModelGroupsNode->GetChildren(); group != nullptr; group = group->GetNext()) {
+                if (group->GetName() == "modelGroup") {
+                    group->DeleteAttribute("selected");
+                    group->AddAttribute("LayoutGroup", "Default");
+                 }
+            }
+        } else { // otherwise need to set models in unchecked groups to unassigned
+            std::set<std::string> modelsAdded;
+            for (wxXmlNode *group = ModelGroupsNode->GetChildren(); group != nullptr; group = group->GetNext()) {
+                if (group->GetName() == "modelGroup") {
+                    std::string selected = group->GetAttribute("selected").ToStdString();
+                    std::string layout_group = "Unassigned";
+                    if( selected == "1" ) {
+                        wxArrayString mn = wxSplit(group->GetAttribute("models"), ',');
+                        for (int x = 0; x < mn.size(); x++) {
+                            std::string name = mn[x].ToStdString();
+                            if (modelsAdded.find(name) == modelsAdded.end()) {
+                                modelsAdded.insert(mn[x].ToStdString());
+                            }
+                        }
+                        layout_group = "Default";
+                    }
+                    group->DeleteAttribute("selected");
+                    group->AddAttribute("LayoutGroup", layout_group);
+                 }
+            }
+            // now move models back to unassigned that were not part of a checked group
+            for (wxXmlNode *model = ModelsNode->GetChildren(); model != nullptr; model = model->GetNext()) {
+                if (model->GetName() == "model") {
+                    std::string mn = model->GetAttribute("name").ToStdString();
+                    if (modelsAdded.find(mn) == modelsAdded.end()) {
+                        model->DeleteAttribute("LayoutGroup");
+                        model->AddAttribute("LayoutGroup", "Unassigned");
+                    }
+                 }
+            }
+        }
+       UnsavedRgbEffectsChanges = true;
+    }
+
     // update version
     EffectsNode->DeleteAttribute("version");
     EffectsNode->AddAttribute("version", XLIGHTS_RGBEFFECTS_VERSION);

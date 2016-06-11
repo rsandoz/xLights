@@ -534,23 +534,17 @@ void LayoutPanel::UpdateModelList(bool update_groups) {
     UnSelectAllModels();
     ListBoxElementList->DeleteAllItems();
 
-    std::vector<Model *> models;
-    std::vector<Model *> dummy_models;
 
-    // Update all the other previews
+    // Update all the custom previews
     for (auto it = xlights->LayoutGroups.begin(); it != xlights->LayoutGroups.end(); it++) {
         LayoutGroup* grp = (LayoutGroup*)(*it);
-        if( grp->GetName() == currentLayoutGroup ) {
-            UpdateModelsForPreview( grp->GetName(), grp, models );
-        } else {
-            UpdateModelsForPreview( grp->GetName(), grp, dummy_models );
-        }
+        std::vector<Model *> dummy_models;
+        UpdateModelsForPreview( grp->GetName(), grp, dummy_models, false );
     }
 
-    // These options are not real layout groups so need to run model building call for them
-    if (currentLayoutGroup == "Default" || currentLayoutGroup == "All Models" || currentLayoutGroup == "Unassigned") {
-        UpdateModelsForPreview( currentLayoutGroup, nullptr, models );
-    }
+    // update the Layout tab preview
+    std::vector<Model *> models;
+    UpdateModelsForPreview( currentLayoutGroup, nullptr, models, true );
 
     for (auto it = models.begin(); it != models.end(); it++) {
         Model *model = *it;
@@ -583,10 +577,10 @@ void LayoutPanel::UpdateModelList(bool update_groups) {
     UpdatePreview();
 }
 
-void LayoutPanel::UpdateModelsForPreview(const std::string &group, LayoutGroup* layout_grp, std::vector<Model *> &prev_models)
+void LayoutPanel::UpdateModelsForPreview(const std::string &group, LayoutGroup* layout_grp, std::vector<Model *> &prev_models, bool filter)
 {
     std::set<std::string> modelsAdded;
-    if( mSelectedGroup == -1 ) {
+    if( mSelectedGroup == -1 || !filter) {
         for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
             Model *model = it->second;
             if (model->GetDisplayAs() != "ModelGroup") {

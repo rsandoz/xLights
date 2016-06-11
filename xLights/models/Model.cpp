@@ -664,10 +664,7 @@ std::string Model::ComputeStringStartChannel(int i) {
     }
     return stch.ToStdString();
 }
-bool Model::IsMyDisplay(wxXmlNode* ModelNode)
-{
-    return ModelNode->GetAttribute(wxT("MyDisplay"),wxT("0")) == wxT("1");
-}
+
 int Model::GetNumStrands() const {
     return 1;
 }
@@ -832,25 +829,7 @@ void Model::SetFromXml(wxXmlNode* ModelNode, bool zb) {
     transparency = n;
     blackTransparency = wxAtoi(ModelNode->GetAttribute("BlackTransparency","0"));
 
-    // check for old my display attribute
-    wxString my_display = ModelNode->GetAttribute(wxT("MyDisplay"),wxT("NotFound"));
-    if( my_display == "NotFound" ) {
-        layout_group = ModelNode->GetAttribute(wxT("LayoutGroup"),wxT("NotFound"));
-        if( layout_group == "NotFound" ) {
-            layout_group = "Default";
-            ModelNode->AddAttribute("LayoutGroup", layout_group);
-            IncrementChangeCount();
-        }
-    } else {
-        ModelNode->DeleteAttribute(wxT("MyDisplay"));
-        if( my_display == "0" ) {
-            layout_group = "Unassigned";
-        } else {
-            layout_group = "Default";
-        }
-        ModelNode->AddAttribute("LayoutGroup", layout_group);
-        IncrementChangeCount();
-    }
+    layout_group = ModelNode->GetAttribute("LayoutGroup","Unassigned");
 
     ModelStartChannel = ModelNode->GetAttribute("StartChannel");
 
