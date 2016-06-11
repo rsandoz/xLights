@@ -449,7 +449,7 @@ void LayoutPanel::OnPropertyGridChange(wxPropertyGridEvent& event) {
             }
             if (i & 0x0010) {
                 // Preview assignment change so model may not exist in current preview anymore
-                CallAfter(&RefreshLayout);
+                CallAfter(&LayoutPanel::RefreshLayout);
             }
             if (i == 0) {
                 printf("Did not handle %s   %s\n",
