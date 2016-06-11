@@ -568,6 +568,16 @@ void xLightsFrame::UpdateModelsList(bool update_groups)
 
     std::set<std::string> modelsAdded;
 
+    // Add all models to default House Preview that are set to Default or All Previews
+    for (auto it = AllModels.begin(); it != AllModels.end(); it++) {
+        Model *model = it->second;
+        if (model->GetLayoutGroup() == "Default" || model->GetLayoutGroup() == "All Previews") {
+            modelsAdded.insert(model->name);
+            PreviewModels.push_back(model);
+        }
+    }
+
+    // Now add all models to default House Preview that are in groups set to Default or All Previews
     for (auto it = AllModels.begin(); it != AllModels.end(); it++) {
         Model *model = it->second;
         if (model->GetDisplayAs() == "ModelGroup") {
@@ -586,14 +596,6 @@ void xLightsFrame::UpdateModelsList(bool update_groups)
         }
     }
 
-    if (PreviewModels.size() == 0) {
-        for (auto it = AllModels.begin(); it != AllModels.end(); it++) {
-            Model *model = it->second;
-            if (model->GetLayoutGroup() == "Default" || model->GetLayoutGroup() == "All Previews") {
-                PreviewModels.push_back(model);
-            }
-        }
-    }
     layoutPanel->UpdateModelList(update_groups);
 }
 

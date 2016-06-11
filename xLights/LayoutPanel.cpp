@@ -535,16 +535,23 @@ void LayoutPanel::UpdateModelList(bool update_groups) {
     ListBoxElementList->DeleteAllItems();
 
 
+    std::vector<Model *> models;
+    std::vector<Model *> dummy_models;
+
     // Update all the custom previews
     for (auto it = xlights->LayoutGroups.begin(); it != xlights->LayoutGroups.end(); it++) {
         LayoutGroup* grp = (LayoutGroup*)(*it);
-        std::vector<Model *> dummy_models;
-        UpdateModelsForPreview( grp->GetName(), grp, dummy_models, false );
+        if( grp->GetName() == currentLayoutGroup ) {
+            UpdateModelsForPreview( currentLayoutGroup, grp, models );
+        } else {
+            UpdateModelsForPreview( grp->GetName(), grp, dummy_models );
+        }
     }
 
-    // update the Layout tab preview
-    std::vector<Model *> models;
-    UpdateModelsForPreview( currentLayoutGroup, nullptr, models, true );
+    // update the Layout tab preview for default options
+    if( currentLayoutGroup == "Default" || currentLayoutGroup == "All Models" || currentLayoutGroup == "Unassigned" ) {
+        UpdateModelsForPreview( currentLayoutGroup, nullptr, models );
+    }
 
     for (auto it = models.begin(); it != models.end(); it++) {
         Model *model = *it;
@@ -577,10 +584,10 @@ void LayoutPanel::UpdateModelList(bool update_groups) {
     UpdatePreview();
 }
 
-void LayoutPanel::UpdateModelsForPreview(const std::string &group, LayoutGroup* layout_grp, std::vector<Model *> &prev_models, bool filter)
+void LayoutPanel::UpdateModelsForPreview(const std::string &group, LayoutGroup* layout_grp, std::vector<Model *> &prev_models)
 {
     std::set<std::string> modelsAdded;
-    if( mSelectedGroup == -1 || !filter) {
+    if( mSelectedGroup == -1 ) {
         for (auto it = xlights->AllModels.begin(); it != xlights->AllModels.end(); it++) {
             Model *model = it->second;
             if (model->GetDisplayAs() != "ModelGroup") {
@@ -1086,6 +1093,7 @@ void LayoutPanel::OnPreviewLeftDown(wxMouseEvent& event)
             m_moving_handle = true;
             m_creating_bound_rect = false;
             newModel = CreateNewModel(selectedButton->GetModelType());
+            newModel->SetLayoutGroup(currentLayoutGroup);
 
             if (newModel != nullptr) {
                 newModel->Selected = true;
@@ -1147,7 +1155,7 @@ void LayoutPanel::OnPreviewLeftUp(wxMouseEvent& event)
         newModel->UpdateXmlWithScale();
         xlights->AllModels.AddModel(newModel);
 
-        newModel->SetLayoutGroup(currentLayoutGroup == "All Models" ? "Unassigned" : currentLayoutGroup);
+        newModel->SetLayoutGroup(currentLayoutGroup == "All Models" ? "Default" : currentLayoutGroup);
 
         if (mSelectedGroup != -1) {
             wxString sel = ListBoxModelGroups->GetItemText(mSelectedGroup, 1);

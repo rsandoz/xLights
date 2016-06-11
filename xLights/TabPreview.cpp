@@ -29,22 +29,6 @@ void xLightsFrame::PreviewOutput(int period)
     modelPreview->Render(&SeqData[period][0]);
 }
 
-
-void xLightsFrame::SetModelAsPartOfDisplay(wxString& model)
-{
-    for(wxXmlNode* e=ModelsNode->GetChildren(); e!=NULL; e=e->GetNext() )
-    {
-        if (e->GetName() == "model")
-        {
-            if(e->GetAttribute("name")== model)
-            {
-                e->DeleteAttribute("MyDisplay");
-                e->AddAttribute("MyDisplay","1");
-            }
-        }
-    }
-}
-
 void xLightsFrame::SetPreviewBackgroundImage(const wxString &filename) {
     if (mBackgroundImage != filename) {
         mBackgroundImage = filename;

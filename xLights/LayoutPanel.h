@@ -153,7 +153,7 @@ class LayoutPanel: public wxPanel
         void DeselectModelList();
         void MarkEffectsFileDirty();
         void SetDirtyHiLight(bool dirty);
-        void UpdateModelsForPreview(const std::string &group, LayoutGroup* layout_grp, std::vector<Model *> &prev_models, bool filter );
+        void UpdateModelsForPreview(const std::string &group, LayoutGroup* layout_grp, std::vector<Model *> &prev_models );
 
         bool SelectSingleModel(int x,int y);
         bool SelectMultipleModels(int x,int y);

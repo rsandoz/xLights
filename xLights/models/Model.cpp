@@ -322,21 +322,12 @@ void Model::AddProperties(wxPropertyGridInterface *grid) {
     }
 
     int layout_group_number = 0;
-    // check for old my display attribute
-    wxString my_display = ModelXml->GetAttribute(wxT("MyDisplay"),wxT("NotFound"));
-    if( my_display == "NotFound" ) {
-        for( int grp=0; grp < LAYOUT_GROUPS.Count(); grp++)
+    for( int grp=0; grp < LAYOUT_GROUPS.Count(); grp++)
+    {
+        if( LAYOUT_GROUPS[grp] == layout_group )
         {
-            if( LAYOUT_GROUPS[grp] == layout_group )
-            {
-                layout_group_number = grp;
-                break;
-            }
-        }
-    } else {
-        ModelXml->DeleteAttribute(wxT("MyDisplay"));
-        if( my_display == "0" ) {
-            layout_group_number = 2; // unassigned
+            layout_group_number = grp;
+            break;
         }
     }
 

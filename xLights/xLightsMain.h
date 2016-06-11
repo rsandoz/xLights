@@ -1192,7 +1192,6 @@ protected:
     bool GetGroupName(wxString& grpname);
     void SetSelectedModelToGroupSelected();
     void ShowModelProperties();
-    void SetModelAsPartOfDisplay(wxString& model);
     unsigned int GetMaxNumChannels();
 
 
